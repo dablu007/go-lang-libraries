@@ -1,3 +1,5 @@
+-- +goose Up
+-- SQL in this section is executed when the migration is applied.
 CREATE TABLE Flows(
    	Id             SERIAL PRIMARY KEY NOT NULL,
 	Name           VARCHAR NOT NULL,
@@ -36,7 +38,7 @@ CREATE TABLE Sections(
 	Name      VARCHAR NOT NULL,
 	ModuleId  SMALLINT NOT NULL,
 	IsVisible Boolean NOT NULL,
-	Version   VARCHAR NOT NULL, 
+	Version   VARCHAR NOT NULL,
 	CreatedOn TIMESTAMP NOT NULL,
 	DeletedOn TIMESTAMP
 );
@@ -45,14 +47,14 @@ CREATE TABLE SectionVersions(
  	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name VARCHAR NOT NULL,
 	ExternalId VARCHAR NOT NULL,
-	SectionId VARCHAR NOT NULL,
+	SectionId SMALLINT NOT NULL,
 	IsVisible BOOLEAN NOT NULL,
 	Version VARCHAR NOT NULL,
 	CreatedOn TIMESTAMP NOT NULL,
 	DeletedOn  TIMESTAMP
 );
 
-CREATE TABLE Module(
+CREATE TABLE Modules(
  	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name      VARCHAR NOT NULL,
 	Status    VARCHAR NOT NULL,
@@ -74,17 +76,20 @@ CREATE TABLE ModuleVersions(
 );
 
 
-ALTER TABLE Sections 
+ALTER TABLE Sections
 ADD CONSTRAINT FK_Sections_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (Id);
 
-ALTER TABLE ModuleVersions 
+ALTER TABLE ModuleVersions
 ADD CONSTRAINT FK_ModuleVersions_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (Id);
 
-ALTER TABLE SectionVersions 
+ALTER TABLE SectionVersions
 ADD CONSTRAINT FK_SectionVersions_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
 
-ALTER TABLE Fields 
+ALTER TABLE Fields
 ADD CONSTRAINT FK_Fields_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
 
-ALTER TABLE FieldVersions 
+ALTER TABLE FieldVersions
 ADD CONSTRAINT FK_FieldVersions_FieldId FOREIGN KEY (FieldId) REFERENCES Fields (Id);
+
+-- +goose Down
+-- SQL in this section is executed when the migration is rolled back.
