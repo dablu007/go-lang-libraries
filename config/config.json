@@ -1,0 +1,21 @@
+{
+    "name": "finbox-integration",
+    "profiles": [
+      "dev"
+    ],
+    "label": "master",
+    "version": "00890d5299f9f7e4df8060149f29302c5b0c88c9",
+    "state": null,
+    "propertySources": [
+      {
+        "name": "https://umesh-zest@bitbucket.org/zestmoney/configurations.git/finbox-integration-dev.properties",
+        "source": {
+          "Environment": "dev",
+          "server.port": ":8081",
+          "JwksUrl": "http://staging-auth.zestmoney.in/.well-known/jwks",
+          "JwksIssuer": "http://staging.zestmoney.in",
+          "JwksAudience": "http://staging.zestmoney.in/resources"
+        }
+      }
+    ]
+  }
