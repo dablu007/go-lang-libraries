@@ -14,7 +14,11 @@
           "server.port": ":8081",
           "JwksUrl": "http://staging-auth.zestmoney.in/.well-known/jwks",
           "JwksIssuer": "http://staging.zestmoney.in",
-          "JwksAudience": "http://staging.zestmoney.in/resources"
+          "JwksAudience": "http://staging.zestmoney.in/resources",
+          "database.username": "shalini",
+          "database.password": "shalini",
+          "database.url": "localhost",
+          "database.name": "flow"
         }
       }
     ]

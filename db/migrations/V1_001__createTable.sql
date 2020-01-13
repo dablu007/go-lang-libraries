@@ -1,0 +1,74 @@
+CREATE TABLE Flows(
+   	Id             SERIAL PRIMARY KEY NOT NULL,
+	Name           VARCHAR NOT NULL,
+	Version        VARCHAR NOT NULL,
+	Type           VARCHAR NOT NULL,
+	Status         VARCHAR NOT NULL,
+	MerchantId     CHAR(36) NOT NULL,
+	ModuleVersions VARCHAR,
+	CreatedOn      TIMESTAMP NOT NULL,
+	DeletedOn      TIMESTAMP
+);
+
+CREATE TABLE Fields(
+ 	Id        SERIAL PRIMARY KEY NOT NULL,
+	Name      VARCHAR NOT NULL,
+	SectionId SMALLINT NOT NULL,
+	IsVisible BOOLEAN NOT NULL,
+	Version   VARCHAR NOT NULL,
+	CreatedOn TIMESTAMP NOT NULL,
+	DeletedOn TIMESTAMP
+);
+
+CREATE TABLE FieldVersions(
+   	Id        SERIAL PRIMARY KEY NOT NULL,
+	Name VARCHAR NOT NULL,
+	ExternalId VARCHAR NOT NULL,
+	FieldId SMALLINT NOT NULL,
+	IsVisible BOOLEAN NOT NULL,
+	Version VARCHAR NOT NULL,
+	CreatedOn TIMESTAMP NOT NULL,
+	DeletedOn TIMESTAMP
+);
+
+CREATE TABLE Sections(
+   	Id        SERIAL PRIMARY KEY NOT NULL,
+	Name      VARCHAR NOT NULL,
+	ModuleId  SMALLINT NOT NULL,
+	IsVisible Boolean NOT NULL,
+	Version   VARCHAR NOT NULL, 
+	CreatedOn TIMESTAMP NOT NULL
+	DeletedOn TIMESTAMP
+);
+
+CREATE TABLE SectionVersions(
+ 	Id        SERIAL PRIMARY KEY NOT NULL,
+	Name VARCHAR NOT NULL,
+	ExternalId VARCHAR NOT NULL,
+	SectionId VARCHAR NOT NULL,
+	IsVisible BOOLEAN NOT NULL,
+	Version VARCHAR NOT NULL,
+	CreatedOn TIMESTAMP NOT NULL,
+	DeletedOn  TIMESTAMP
+);
+
+CREATE TABLE Module(
+ 	Id        SERIAL PRIMARY KEY NOT NULL,
+	Name      VARCHAR NOT NULL,
+	Status    VARCHAR NOT NULL,
+	IsVisible BOOLEAN NOT NULL,
+	TenantId  VARCHAR NOT NULL,
+	CreatedOn TIMESTAMP NOT NULL,
+	DeletedOn TIMESTAMP
+);
+
+CREATE TABLE ModuleVersions(
+ 	Id        SERIAL PRIMARY KEY NOT NULL,
+	ModuleId        SMALLINT NOT NULL,
+	ExternalId      VARCHAR NOT NULL,
+	Version         VARCHAR NOT NULL,
+	CreatedOn       TIMESTAMP NOT NULL,
+	DeletedOn       TIMESTAMP
+	Properties      VARCHAR
+	SectionVersions VARCHAR
+);
