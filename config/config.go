@@ -2,11 +2,11 @@ package config
 
 import (
 	"bytes"
+	"github.com/buger/jsonparser"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"github.com/buger/jsonparser"
-	"github.com/spf13/viper"
 )
 
 var config *viper.Viper
@@ -16,7 +16,7 @@ func Init(service, env string) {
 	configFile, err := http.Get("http://configuration.zestmoney.in:8888/" + service + "/" + env)
 	if err != nil {
 		log.Print("Error fetching configuration from server for service : " + service + " env : " + env)
-		bodyBytes, err = ioutil.ReadFile("config/conf.json")
+		bodyBytes, err = ioutil.ReadFile("config/config.json")
 		if err != nil {
 			log.Fatal("Couldn't read local configuration file.")
 		} else {

@@ -7,6 +7,7 @@ import (
 
 	"flow/auth"
 	"flow/config"
+	"flow/db"
 	"flow/server"
 )
 
@@ -27,5 +28,6 @@ func main() {
 	//db.Init(config.GetConfig())
 	auth.Init()
 	flag.Parse()
+	db.Init()
 	server.Init()
 }

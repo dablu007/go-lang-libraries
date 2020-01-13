@@ -37,7 +37,7 @@ CREATE TABLE Sections(
 	ModuleId  SMALLINT NOT NULL,
 	IsVisible Boolean NOT NULL,
 	Version   VARCHAR NOT NULL, 
-	CreatedOn TIMESTAMP NOT NULL
+	CreatedOn TIMESTAMP NOT NULL,
 	DeletedOn TIMESTAMP
 );
 
@@ -68,8 +68,8 @@ CREATE TABLE ModuleVersions(
 	ExternalId      VARCHAR NOT NULL,
 	Version         VARCHAR NOT NULL,
 	CreatedOn       TIMESTAMP NOT NULL,
-	DeletedOn       TIMESTAMP
-	Properties      JSON
+	DeletedOn       TIMESTAMP,
+	Properties      JSON,
 	SectionVersions JSON
 );
 

@@ -11,14 +11,14 @@
         "name": "https://umesh-zest@bitbucket.org/zestmoney/configurations.git/finbox-integration-dev.properties",
         "source": {
           "Environment": "dev",
-          "server.port": ":8081",
+          "server.port": ":8080",
           "JwksUrl": "http://staging-auth.zestmoney.in/.well-known/jwks",
           "JwksIssuer": "http://staging.zestmoney.in",
           "JwksAudience": "http://staging.zestmoney.in/resources",
           "database.username": "shalini",
-          "database.password": "shalini",
+          "database.password": "123456",
           "database.url": "localhost",
-          "database.name": "flow"
+          "database.name": "mydb"
         }
       }
     ]

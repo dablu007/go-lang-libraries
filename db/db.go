@@ -2,7 +2,7 @@ package db
 
 import (
 	"bitbucket.org/liamstask/goose/lib/goose"
-	"f/config"
+	"flow/config"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jinzhu/gorm"
@@ -28,7 +28,7 @@ func Init() {
 	//dbConnectionString := dbUserName + ":" + dbPassword + "@tcp(" + dbUrl + ")/" + dbName
 	db, err = gorm.Open("postgres", dbUri)
 	if err != nil {
-		fmt.Println("failed to connect.")
+		fmt.Println("failed to connect.", dbUri)
 	}
 	workingDir, err := os.Getwd()
 	if err != nil {
