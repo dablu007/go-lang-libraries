@@ -4,8 +4,8 @@ CREATE TABLE Flows(
 	Version        VARCHAR NOT NULL,
 	Type           VARCHAR NOT NULL,
 	Status         VARCHAR NOT NULL,
-	MerchantId     CHAR(36) NOT NULL,
-	ModuleVersions VARCHAR,
+	MerchantId     UUID NOT NULL,
+	ModuleVersions JSON,
 	CreatedOn      TIMESTAMP NOT NULL,
 	DeletedOn      TIMESTAMP
 );
@@ -69,6 +69,22 @@ CREATE TABLE ModuleVersions(
 	Version         VARCHAR NOT NULL,
 	CreatedOn       TIMESTAMP NOT NULL,
 	DeletedOn       TIMESTAMP
-	Properties      VARCHAR
-	SectionVersions VARCHAR
+	Properties      JSON
+	SectionVersions JSON
 );
+
+
+ALTER TABLE Sections 
+ADD CONSTRAINT FK_Sections_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (Id);
+
+ALTER TABLE ModuleVersions 
+ADD CONSTRAINT FK_ModuleVersions_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (Id);
+
+ALTER TABLE SectionVersions 
+ADD CONSTRAINT FK_SectionVersions_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
+
+ALTER TABLE Fields 
+ADD CONSTRAINT FK_Fields_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
+
+ALTER TABLE FieldVersions 
+ADD CONSTRAINT FK_FieldVersions_FieldId FOREIGN KEY (FieldId) REFERENCES Fields (Id);

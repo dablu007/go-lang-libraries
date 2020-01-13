@@ -1,21 +1,20 @@
 package db
 
 import (
-	"zestmoney/flow_cgm/config"
 	"bitbucket.org/liamstask/goose/lib/goose"
+	"f/config"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/lib/pq"
 	logrs "github.com/sirupsen/logrus"
-	"os"
 	"log"
+	"os"
 )
 
 var db *gorm.DB
 var err error
-
 
 func Init() {
 	config := config.GetConfig()
@@ -32,7 +31,7 @@ func Init() {
 		fmt.Println("failed to connect.")
 	}
 	workingDir, err := os.Getwd()
-	if (err != nil){
+	if err != nil {
 		log.Fatal(" Not able to fetch the working directory")
 		return
 	}
@@ -43,10 +42,8 @@ func Init() {
 		Driver: goose.DBDriver{
 			Name:    "postgres",
 			OpenStr: dbUri,
-			Import: "github.com/lib/pq",
-			Dialect: &goose.PostgresDialect{
-
-			},
+			Import:  "github.com/lib/pq",
+			Dialect: &goose.PostgresDialect{},
 		},
 	}
 	logrs.Println(" Fetching the most recent DB version ")
@@ -55,7 +52,7 @@ func Init() {
 		log.Println(err)
 
 	}
-	fmt.Println(" Most recent DB version " , latest)
+	fmt.Println(" Most recent DB version ", latest)
 	logrs.Println("Running the migrations on db")
 	err = goose.RunMigrationsOnDb(migrateConf, migrateConf.MigrationsDir, latest, db.DB())
 	if err != nil {
