@@ -53,7 +53,7 @@ func Init() {
 
 	}
 	fmt.Println(" Most recent DB version ", latest)
-	logrs.Println("Running the migrations on db")
+	logrs.Println("Running the migrations on db", workingDir)
 	err = goose.RunMigrationsOnDb(migrateConf, migrateConf.MigrationsDir, latest, db.DB())
 	if err != nil {
 		log.Println(err)

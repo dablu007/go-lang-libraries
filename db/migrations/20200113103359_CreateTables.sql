@@ -1,3 +1,6 @@
+-- +goose Up
+-- SQL in this section is executed when the migration is applied.
+
 CREATE TABLE Flows(
    	Id             SERIAL PRIMARY KEY NOT NULL,
 	Name           VARCHAR NOT NULL,
@@ -45,14 +48,14 @@ CREATE TABLE SectionVersions(
  	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name VARCHAR NOT NULL,
 	ExternalId VARCHAR NOT NULL,
-	SectionId VARCHAR NOT NULL,
+	SectionId SMALLINT NOT NULL,
 	IsVisible BOOLEAN NOT NULL,
 	Version VARCHAR NOT NULL,
 	CreatedOn TIMESTAMP NOT NULL,
 	DeletedOn  TIMESTAMP
 );
 
-CREATE TABLE Module(
+CREATE TABLE Modules(
  	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name      VARCHAR NOT NULL,
 	Status    VARCHAR NOT NULL,
@@ -80,11 +83,11 @@ ADD CONSTRAINT FK_Sections_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (I
 ALTER TABLE ModuleVersions 
 ADD CONSTRAINT FK_ModuleVersions_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (Id);
 
-ALTER TABLE SectionVersions 
-ADD CONSTRAINT FK_SectionVersions_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
-
 ALTER TABLE Fields 
 ADD CONSTRAINT FK_Fields_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
 
 ALTER TABLE FieldVersions 
 ADD CONSTRAINT FK_FieldVersions_FieldId FOREIGN KEY (FieldId) REFERENCES Fields (Id);
+
+ALTER TABLE SectionVersions 
+ADD CONSTRAINT FK_SectionVersions_SectionId FOREIGN KEY (SectionId) REFERENCES Sections (Id);
