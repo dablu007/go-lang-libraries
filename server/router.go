@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
 	"flow/auth"
 	"flow/controller"
+	"github.com/gin-gonic/gin"
 )
 
 func NewRouter() *gin.Engine {
@@ -18,10 +18,11 @@ func NewRouter() *gin.Engine {
 
 	v1 := router.Group("flow/api/v1")
 	{
-		group := v1.Group("/flows")
+		group := v1.Group("/")
 		{
 			flowController := new(controller.FlowController)
-			group.GET("", flowController.GetAllFlows())
+			group.GET("flows", flowController.GetAllFlows())
+			group.GET("Teapot", flowController.TeaPot())
 		}
 	}
 	return router

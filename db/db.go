@@ -28,14 +28,14 @@ func Init() {
 	//dbConnectionString := dbUserName + ":" + dbPassword + "@tcp(" + dbUrl + ")/" + dbName
 	db, err = gorm.Open("postgres", dbUri)
 	if err != nil {
-		fmt.Println("failed to connect.", dbUri)
+		fmt.Println("failed to connect.", dbUri, err)
 	}
 	workingDir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(" Not able to fetch the working directory")
 		return
 	}
-	db.SingularTable(true)
+	db.SingularTable(false)
 	workingDir = workingDir + "/db/migrations"
 	migrateConf := &goose.DBConf{
 		MigrationsDir: workingDir,

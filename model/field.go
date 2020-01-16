@@ -1,13 +1,19 @@
 package model
 
-import "time"
+import (
+	"flow/enum"
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 type Field struct {
-	Id        int
-	Name      string
+	gorm.Model
+	Id        int    `gorm:"primary_key";"AUTO_INCREMENT"`
+	Name      string `gorm:"type:varchar(200)"`
 	SectionId int
+	Status    enum.Status
 	IsVisible bool
-	Version   string
+	TenantId  string
 	CreatedOn time.Time
 	DeletedOn time.Time
 }

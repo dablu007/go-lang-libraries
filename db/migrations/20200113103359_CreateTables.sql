@@ -16,9 +16,10 @@ CREATE TABLE Flows(
 CREATE TABLE Fields(
  	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name      VARCHAR NOT NULL,
-	SectionId SMALLINT NOT NULL,
+	SectionId INT NOT NULL,
+	TenantId VARCHAR, 
+	Status         VARCHAR NOT NULL,
 	IsVisible BOOLEAN NOT NULL,
-	Version   VARCHAR NOT NULL,
 	CreatedOn TIMESTAMP NOT NULL,
 	DeletedOn TIMESTAMP
 );
@@ -27,7 +28,7 @@ CREATE TABLE FieldVersions(
    	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name VARCHAR NOT NULL,
 	ExternalId VARCHAR NOT NULL,
-	FieldId SMALLINT NOT NULL,
+	FieldId INT NOT NULL,
 	IsVisible BOOLEAN NOT NULL,
 	Version VARCHAR NOT NULL,
 	CreatedOn TIMESTAMP NOT NULL,
@@ -37,18 +38,19 @@ CREATE TABLE FieldVersions(
 CREATE TABLE Sections(
    	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name      VARCHAR NOT NULL,
-	ModuleId  SMALLINT NOT NULL,
+	ModuleId  INT NOT NULL,
+	TenantId VARCHAR,
 	IsVisible Boolean NOT NULL,
-	Version   VARCHAR NOT NULL, 
 	CreatedOn TIMESTAMP NOT NULL,
 	DeletedOn TIMESTAMP
 );
+
 
 CREATE TABLE SectionVersions(
  	Id        SERIAL PRIMARY KEY NOT NULL,
 	Name VARCHAR NOT NULL,
 	ExternalId VARCHAR NOT NULL,
-	SectionId SMALLINT NOT NULL,
+	SectionId INT NOT NULL,
 	IsVisible BOOLEAN NOT NULL,
 	Version VARCHAR NOT NULL,
 	CreatedOn TIMESTAMP NOT NULL,
@@ -67,7 +69,7 @@ CREATE TABLE Modules(
 
 CREATE TABLE ModuleVersions(
  	Id        SERIAL PRIMARY KEY NOT NULL,
-	ModuleId        SMALLINT NOT NULL,
+	ModuleId        INT NOT NULL,
 	ExternalId      VARCHAR NOT NULL,
 	Version         VARCHAR NOT NULL,
 	CreatedOn       TIMESTAMP NOT NULL,
@@ -75,7 +77,6 @@ CREATE TABLE ModuleVersions(
 	Properties      JSON,
 	SectionVersions JSON
 );
-
 
 ALTER TABLE Sections 
 ADD CONSTRAINT FK_Sections_ModuleId FOREIGN KEY (ModuleId) REFERENCES Modules (Id);

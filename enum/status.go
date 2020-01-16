@@ -1,15 +1,8 @@
 package enum
 
-type Status int
+type Status string
 
 const (
-	Pending Status = iota
-	Invalid
-	Partial
-	Expired
-	Completed
+	Active   = "Active"
+	Inactive = "Inactive"
 )
-
-func (s Status) String() string {
-	return [...]string{"Pending", "Invalid", "Partial", "Expired", "Completed"}[s]
-}

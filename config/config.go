@@ -2,23 +2,25 @@ package config
 
 import (
 	"bytes"
-	"github.com/buger/jsonparser"
-	"github.com/spf13/viper"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/buger/jsonparser"
+	"github.com/spf13/viper"
 )
 
 var config *viper.Viper
 
 func Init(service, env string) {
 	var bodyBytes []byte
-	configFile, err := http.Get("http://configuration.zestmoney.in:8888/" + service + "/" + env)
+	configFile, err := http.Get("http://configurations.zestmoney.in:8888/" + service + "/" + env)
 	if err != nil {
 		log.Print("Error fetching configuration from server for service : " + service + " env : " + env)
 		bodyBytes, err = ioutil.ReadFile("config/config.json")
 		if err != nil {
-			log.Fatal("Couldn't read local configuration file.")
+			log.Fatal("Couldn't read local configuration file.", err)
 		} else {
 			log.Print("using local config.")
 		}
@@ -34,15 +36,16 @@ func Init(service, env string) {
 	config = viper.New()
 	config.SetConfigType("json")
 	config.SetConfigName(env)
+	fmt.Print("body:", string(bodyBytes))
 	parsedConfig, _, _, parseErr := jsonparser.Get(bodyBytes, "propertySources", "[0]", "source")
 	if parseErr != nil {
-		log.Fatal("Failed to parse config JSON: %s", parseErr)
+		log.Fatal("Failed to parse config JSON: ", parseErr)
 	}
 
 	//err = config.ReadConfig(bytes.NewBuffer(parsedConfig))
 	err = config.ReadConfig(bytes.NewReader(parsedConfig))
 	if err != nil {
-		log.Fatal("Failed to reading config: %s", err)
+		log.Fatal("Failed to reading config: ", err)
 	}
 }
 

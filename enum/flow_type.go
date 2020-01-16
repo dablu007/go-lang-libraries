@@ -1,5 +1,8 @@
 package enum
 
-type FlowType int
+type FlowType string
 
-const ()
+const (
+	CL = "CL"
+	PL = "PL"
+)
