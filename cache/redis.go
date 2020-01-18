@@ -2,7 +2,6 @@ package cache
 
 import "fmt"
 
-// import "github.com/aws/aws-sdk-go/service/elasticache"
 import "github.com/go-redis/redis/v7"
 
 var client *redis.Client
@@ -16,7 +15,6 @@ func Init() {
 
 	pong, err := client.Ping().Result()
 	fmt.Println(pong, err)
-	// Output: PONG <nil>
 }
 
 func GetRedisClient() *redis.Client {

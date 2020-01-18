@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"bitbucket.org/zestmoney/finbox/config"
+	"flow/config"
 	logrs "github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

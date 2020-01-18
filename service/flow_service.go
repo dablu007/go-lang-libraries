@@ -5,138 +5,125 @@ import (
 	"flow/cache"
 	"flow/db"
 	"flow/enum"
+	"flow/logger"
 	"flow/model"
 	"flow/model/response_dto"
-	"fmt"
-
-	uuid "github.com/satori/go.uuid"
 )
 
 type FlowService struct {
+	redisKey model.RedisKey
 }
 
-func (u FlowService) GetMerchantFlows(merchantId string) response_dto.FlowResponsesDto {
-	//Add log
+func (u FlowService) GetFlows(merchantId string, tenantId string, channelId string) response_dto.FlowResponsesDto {
+	methodName := "GetFlows"
+	logger.SugarLogger.Info(methodName, "Recieved request to get all the flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId)
 	redisClient := cache.GetRedisClient()
 	var flowsResponse response_dto.FlowResponsesDto
 	if redisClient != nil {
-		cachedFlow, err := redisClient.Get(merchantId).Result()
-		//Add log
+		logger.SugarLogger.Info(methodName, "Fetching flows from redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId)
+		redisKey := model.RedisKey{MerchantId: merchantId,
+			TenantId:  tenantId,
+			ChannelId: channelId}
+
+		cachedFlow, err := redisClient.Get(redisKey.ToString()).Result()
 		if err != nil {
-			//Add log
+			logger.SugarLogger.Info(methodName, "Failed to fetch flows from redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
 		}
 		if cachedFlow == "" {
-			//Add log
-			flows := FetchAllMerchantFlowsFromDB(merchantId)
+			logger.SugarLogger.Info(methodName, "No flows exist in redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId)
+			flowContext := model.FlowContext{
+				MerchantId: merchantId,
+				TenantId:   tenantId,
+				ChannelId:  channelId}
+			flows := FetchAllFlowsFromDB(flowContext)
 			flowsResponse, err := GetParsedMerchantFlows(flows)
 			if err != nil {
-				//Add log
+				logger.SugarLogger.Info(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
 			} else {
 				//Add expiry time for cache entry.
 				response, err := json.Marshal(flowsResponse)
 				if err == nil {
-					setStatus := redisClient.Set(merchantId, response, 0)
-					fmt.Println(setStatus.Result())
+					setStatus := redisClient.Set(redisKey.ToString(), response, 0)
+					logger.SugarLogger.Info(methodName, " set redis status: ", setStatus, " key: ", redisKey.ToString)
 				}
 			}
 			return flowsResponse
+
 		} else {
 			json.Unmarshal([]byte(cachedFlow), &flowsResponse)
 		}
 	} else {
-		//Log redis connection failure.
+		logger.SugarLogger.Info(methodName, "Failed to connect with redis client. ")
 	}
 	return flowsResponse
 }
 
-func FetchAllMerchantFlowsFromDB(merchantId string) []model.Flow {
-	fmt.Println("fetching from db")
+func FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
 	dbConnection := db.GetDB()
 	var flows []model.Flow
 	if dbConnection == nil {
-		fmt.Print("failed to connect")
-	} else {
-		dbConnection.Where("merchantid = ?", uuid.FromStringOrNil(merchantId)).Find(&flows)
+		return flows
 	}
-	//Add log
+	dbConnection.Debug().Where("flow_context->>'MerchantId' = ? and flow_context->>'TenantId' = ? and flow_context->>'ChannelId' = ? and status = ? and deleted_on is NULL", flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId, enum.Active).Find(&flows)
 	return flows
 }
 
 func GetParsedMerchantFlows(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
+	dbConnection := db.GetDB()
 	var response response_dto.FlowResponsesDto
 	for _, flow := range flows {
-		//Todo: write logic to parse entire json
-		var flowResponseDto response_dto.FlowResponseDto
-		flowResponseDto.Name = flow.Name
-		flowResponseDto.Version = flow.Version
-		flowResponseDto.Type = flow.Type
-		flowResponseDto.Status = flow.Status
-		var moduleVersionResponses []response_dto.ModuleVersionResponseDto
-		var moduleList []int
-		dbConnection := db.GetDB()
-		err := json.Unmarshal([]byte(flow.ModuleVersions), &moduleList)
-		if err != nil {
-			fmt.Println(err)
-		}
-		for i := 0; i < len(moduleList); i++ {
-			var moduleVersionResponseDto response_dto.ModuleVersionResponseDto
-			module := &model.Module{Id: int(moduleList[i]), Status: enum.Active}
-			dbConnection.Debug().Find(&module).Related(&module.ModuleVersions)
-
-			moduleVersionResponseDto.Name = module.Name
-			moduleVersionResponseDto.Status = module.Status
-
-			for _, moduleVersion := range module.ModuleVersions {
-				moduleVersionResponseDto.Version = moduleVersion.Version
-				moduleVersionResponseDto.ExternalId = moduleVersion.ExternalId
-				json.Unmarshal([]byte(moduleVersion.Properties), &moduleVersionResponseDto.Properties)
-
-				var sectionList []int
-				err := json.Unmarshal([]byte(moduleVersion.Sections), &sectionList)
-				if err != nil {
-					fmt.Println(err)
-				}
-
-				//Find sections against each module versions
-				//Todo: this should be section
-
-				var sectionVersionResponseDto response_dto.SectionVersionsResponseDto
-				for _, sectionId := range sectionList {
-					var section model.Section
-					section.Id = sectionId
-					dbConnection.Find(&section).Related(&section.SectionVersions).Related(&section.Fields)
-					sectionVersionResponseDto.Name = section.Name
-					sectionVersionResponseDto.Status = section.Status
-					sectionVersionResponseDto.IsVisible = section.IsVisible
-
-					//Find all the Sectionsversions and map them to fields
-					for _, sectionVersion := range section.SectionVersions {
-						fmt.Println(sectionVersion)
-						for _, field := range section.Fields {
-							var fieldModel model.Field
-							fieldModel.Id = field.Id
-							dbConnection.Find(&fieldModel).Related(&fieldModel.FieldVersions)
-							var fieldVersionsResponseDto response_dto.FieldVersionsResponseDto
-							fieldVersionsResponseDto.Name = fieldModel.Name
-							fieldVersionsResponseDto.Status = fieldModel.Status
-							fieldVersionsResponseDto.IsVisible = fieldModel.IsVisible
-							for _, fieldVersion := range fieldModel.FieldVersions {
-								fieldVersionsResponseDto.Version = fieldVersion.Version
-								fieldVersionsResponseDto.ExternalId = fieldVersion.ExternalId
-								fieldVersionsResponseDto.IsVisible = fieldVersion.IsVisible
-								sectionVersionResponseDto.Fields = append(sectionVersionResponseDto.Fields, fieldVersionsResponseDto)
-							}
-						}
-
-					}
-					moduleVersionResponseDto.Sections = append(moduleVersionResponseDto.Sections, sectionVersionResponseDto)
-				}
+		flowResponseDto := response_dto.FlowResponseDto{
+			Name:       flow.Name,
+			ExternalId: flow.ExternalId,
+			Version:    flow.Version,
+			Type:       flow.Type}
+		var moduleVersionNumberList []int
+		json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionNumberList)
+		for i := 0; i < len(moduleVersionNumberList); i++ {
+			var moduleVersion model.ModuleVersion
+			dbConnection.Debug().Joins("JOIN modules ON modules.id = module_versions.module_id and modules.status = ? and modules.deleted_on is NULL", enum.Active).Where("module_versions.id = ? and module_versions.deleted_on is NULL", moduleVersionNumberList[i]).Find(&moduleVersion)
+			if (model.ModuleVersion{}) == moduleVersion {
+				continue
 			}
-
-			moduleVersionResponses = append(moduleVersionResponses, moduleVersionResponseDto)
+			moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{
+				Name:       moduleVersion.Name,
+				ExternalId: moduleVersion.ExternalId,
+				Version:    moduleVersion.Version}
+			json.Unmarshal([]byte(moduleVersion.Properties), &moduleVersionResponseDto.Properties)
+			var sectionVersionNumberList []int
+			json.Unmarshal([]byte(moduleVersion.SectionVersions), &sectionVersionNumberList)
+			for i := 0; i < len(sectionVersionNumberList); i++ {
+				var sectionVersion model.SectionVersion
+				dbConnection.Debug().Joins("JOIN sections ON sections.id = section_versions.section_id and sections.status = ? and sections.deleted_on is NULL", enum.Active).Where("section_versions.id = ? and section_versions.deleted_on is NULL", sectionVersionNumberList[i]).Find(&sectionVersion)
+				if (model.SectionVersion{}) == sectionVersion {
+					continue
+				}
+				sectionVersionResponseDto := response_dto.SectionVersionsResponseDto{
+					Name:       sectionVersion.Name,
+					ExternalId: sectionVersion.ExternalId,
+					Version:    sectionVersion.Version,
+					IsVisible:  sectionVersion.IsVisible}
+				json.Unmarshal([]byte(sectionVersion.Properties), &sectionVersionResponseDto.Properties)
+				var fieldVersionNumberList []int
+				json.Unmarshal([]byte(sectionVersion.FieldVersions), &fieldVersionNumberList)
+				for i := 0; i < len(fieldVersionNumberList); i++ {
+					var fieldVersion model.FieldVersion
+					dbConnection.Debug().Joins("JOIN fields ON fields.id = field_versions.field_id and fields.status = ? and fields.deleted_on is NULL", enum.Active).Where("field_versions.id = ? and field_versions.deleted_on is NULL", fieldVersionNumberList[i]).Find(&fieldVersion)
+					if (model.FieldVersion{}) == fieldVersion {
+						continue
+					}
+					fieldVersionResponseDto := response_dto.FieldVersionsResponseDto{
+						Name:       fieldVersion.Name,
+						ExternalId: fieldVersion.ExternalId,
+						IsVisible:  fieldVersion.IsVisible,
+						Version:    fieldVersion.Version}
+					json.Unmarshal([]byte(fieldVersion.Properties), &fieldVersionResponseDto.Properties)
+					sectionVersionResponseDto.Fields = append(sectionVersionResponseDto.Fields, fieldVersionResponseDto)
+				}
+				moduleVersionResponseDto.Sections = append(moduleVersionResponseDto.Sections, sectionVersionResponseDto)
+			}
+			flowResponseDto.Modules = append(flowResponseDto.Modules, moduleVersionResponseDto)
 		}
-
-		flowResponseDto.Modules = moduleVersionResponses
 		response.FlowResponses = append(response.FlowResponses, flowResponseDto)
 	}
 	return response, nil

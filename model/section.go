@@ -1,20 +1,15 @@
 package model
 
 import (
-	"flow/enum"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 type Section struct {
-	// gorm.Model
-	Id              int    `gorm:"primary_key";"AUTO_INCREMENT"`
-	Name            string `gorm:"type:varchar(200)"`
-	Status          enum.Status
-	IsVisible       bool
-	TenantId        string
-	CreatedOn       time.Time
-	DeletedOn       time.Time
-	Module          Module `gorm:"foreignkey:fk_sections_moduleid"`
-	Fields          []Field
-	SectionVersions []SectionVersion
+	Id        int       `gorm:"primary_key";"AUTO_INCREMENT";"column:id"`
+	Name      string    `gorm:"type:varchar(200)";"column:name"`
+	TenantId  uuid.UUID `gorm:"column:tenant_id"`
+	CreatedOn time.Time `gorm:"column:created_on"`
+	DeletedOn time.Time `gorm:"column:deleted_on"`
 }

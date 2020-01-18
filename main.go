@@ -9,6 +9,7 @@ import (
 	"flow/cache"
 	"flow/config"
 	"flow/db"
+	"flow/logger"
 	"flow/server"
 )
 
@@ -25,8 +26,7 @@ func main() {
 	flag.Parse()
 
 	config.Init(service, environment)
-	//logger.InitLogger()
-	//db.Init(config.GetConfig())
+	logger.InitLogger()
 	auth.Init()
 	flag.Parse()
 	db.Init()

@@ -18,7 +18,12 @@
           "database.username": "shalini",
           "database.password": "123456",
           "database.url": "localhost",
-          "database.name": "flow"
+          "database.name": "flow",
+          "log.file.path": "/var/log/",
+          "log.file.name": "finbox.log",
+          "log.file.maxsize": 10,
+          "log.file.maxbackup": 5,
+          "log.file.maxage": 30
         }
       }
     ]
