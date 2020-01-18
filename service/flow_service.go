@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flow/cache"
 	"flow/db"
+	"flow/enum"
 	"flow/model"
 	"flow/model/response_dto"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 func GetAllFlowsByMerchantId(merchantId string, tenantId string, channel string) response_dto.FlowResponseDto {
 	fmt.Println("Trying to fetch from redis cache.")
 	redisClient := cache.GetRedisClient()
-	var merchantFlows []uint8
+	var merchantFlows []int
 	var response response_dto.FlowResponseDto
 	if redisClient != nil {
 		flows, err := redisClient.Get(merchantId).Result()
@@ -25,7 +26,8 @@ func GetAllFlowsByMerchantId(merchantId string, tenantId string, channel string)
 		if flows == "" {
 			fmt.Println("Fetching all from db")
 			flow := FetchAllMerchantFlowsFromDB(merchantId)
-			merchantFlows = *flow.ModuleVersions
+			json.Unmarshal([]byte(flow.ModuleVersions), &merchantFlows)
+			// merchantFlows = flow.ModuleVersions
 			if merchantFlows != nil {
 				flowResponseDto, err := ParseMerchantFlowsJsonValues(flow)
 				if err != nil {
@@ -45,15 +47,15 @@ func GetAllFlowsByMerchantId(merchantId string, tenantId string, channel string)
 func FetchAllMerchantFlowsFromDB(merchantId string) model.Flow {
 	fmt.Println("fetching from db")
 	dbConnection := db.GetDB()
-	var flow model.Flow
+	var flow *model.Flow
 	if dbConnection == nil {
 		fmt.Print("failed to connect")
-	} else {
-		flow := &model.Flow{MerchantId: uuid.FromStringOrNil(merchantId)}
-		dbConnection.Debug().First(&flow)
+		return *flow
 	}
-	fmt.Print(flow.Id, flow.Name)
-	return flow
+	flow = &model.Flow{MerchantId: uuid.FromStringOrNil(merchantId)}
+	dbConnection.First(&flow)
+	fmt.Print(flow.Id, flow.Name, flow.CreatedOn)
+	return *flow
 }
 
 func ParseMerchantFlowsJsonValues(flow model.Flow) (response_dto.FlowResponseDto, error) {
@@ -64,54 +66,65 @@ func ParseMerchantFlowsJsonValues(flow model.Flow) (response_dto.FlowResponseDto
 	flowResponseDto.Type = flow.Type
 	flowResponseDto.Status = flow.Status
 	var moduleVersionResponses []response_dto.ModuleVersionResponseDto
-	var moduleList []uint8
+	var moduleList []int
 	dbConnection := db.GetDB()
-	moduleList = *flow.ModuleVersions
+	err := json.Unmarshal([]byte(flow.ModuleVersions), &moduleList)
+	if err != nil {
+		fmt.Println(err)
+	}
 	for i := 0; i < len(moduleList); i++ {
 		var moduleVersionResponseDto response_dto.ModuleVersionResponseDto
-		module := &model.Module{Id: int(moduleList[i])}
-		dbConnection.Find(&module)
+		module := &model.Module{Id: int(moduleList[i]), Status: enum.Active}
+		dbConnection.Debug().Find(&module).Related(&module.ModuleVersions)
+
 		moduleVersionResponseDto.Name = module.Name
 		moduleVersionResponseDto.Status = module.Status
-		moduleVersion := &model.ModuleVersion{ModuleId: int(moduleList[i])}
-		dbConnection.Find(&moduleVersion)
-		moduleVersionResponseDto.Version = moduleVersion.Version
-		moduleVersionResponseDto.ExternalId = moduleVersion.ExternalId
-		moduleVersionResponseDto.Properties = moduleVersion.Properties
 
-		//Todo: Find sections
-		var sectionList []int
-		err := json.Unmarshal([]byte(moduleVersion.SectionVersions), sectionList)
-		if err != nil {
+		for _, moduleVersion := range module.ModuleVersions {
+			moduleVersionResponseDto.Version = moduleVersion.Version
+			moduleVersionResponseDto.ExternalId = moduleVersion.ExternalId
+			json.Unmarshal([]byte(moduleVersion.Properties), &moduleVersionResponseDto.Properties)
 
-		}
-		for j := 0; j < len(sectionList); j++ {
-			var sectionVersionResponseDto response_dto.SectionVersionsResponseDto
-			section := &model.Section{Id: sectionList[i]}
-			dbConnection.Find(&section)
-			sectionVersionResponseDto.Name = section.Name
-			sectionVersionResponseDto.Status = section.Status
-			sectionVersion := &model.SectionVersion{SectionId: sectionList[i]}
-			dbConnection.Find(&sectionVersion)
-			sectionVersionResponseDto.ExternalId = sectionVersion.ExternalId
-			sectionVersionResponseDto.Version = sectionVersion.Version
-
-			//Todo: Find Fields
-			for j := 0; j < len(sectionList); j++ {
-				var fieldVersionsResponseDto response_dto.FieldVersionsResponseDto
-				field := &model.Field{SectionId: sectionList[i]}
-				dbConnection.Find(&field)
-				fieldVersionsResponseDto.Name = field.Name
-				fieldVersionsResponseDto.Status = field.Status
-				fieldVersion := &model.FieldVersion{FieldId: field.Id}
-				dbConnection.Find(&fieldVersion)
-				fieldVersionsResponseDto.ExternalId = fieldVersion.ExternalId
-				fieldVersionsResponseDto.Version = fieldVersion.Version
-
-				sectionVersionResponseDto.Fields = append(sectionVersionResponseDto.Fields, fieldVersionsResponseDto)
+			var sectionList []int
+			err := json.Unmarshal([]byte(moduleVersion.Sections), &sectionList)
+			if err != nil {
+				fmt.Println(err)
 			}
 
-			moduleVersionResponseDto.Sections = append(moduleVersionResponseDto.Sections, sectionVersionResponseDto)
+			//Find sections against each module versions
+			//Todo: this should be section
+
+			var sectionVersionResponseDto response_dto.SectionVersionsResponseDto
+			for _, sectionId := range sectionList {
+				var section model.Section
+				section.Id = sectionId
+				dbConnection.Find(&section).Related(&section.SectionVersions).Related(&section.Fields)
+				sectionVersionResponseDto.Name = section.Name
+				sectionVersionResponseDto.Status = section.Status
+				sectionVersionResponseDto.IsVisible = section.IsVisible
+
+				//Find all the Sectionsversions and map them to fields
+				for _, sectionVersion := range section.SectionVersions {
+					fmt.Println(sectionVersion)
+					for _, field := range section.Fields {
+						var fieldModel model.Field
+						fieldModel.Id = field.Id
+						dbConnection.Find(&fieldModel).Related(&fieldModel.FieldVersions)
+						var fieldVersionsResponseDto response_dto.FieldVersionsResponseDto
+						fieldVersionsResponseDto.Name = fieldModel.Name
+						fieldVersionsResponseDto.Status = fieldModel.Status
+						fieldVersionsResponseDto.IsVisible = fieldModel.IsVisible
+						for _, fieldVersion := range fieldModel.FieldVersions {
+							fieldVersionsResponseDto.Version = fieldVersion.Version
+							fieldVersionsResponseDto.ExternalId = fieldVersion.ExternalId
+							fieldVersionsResponseDto.IsVisible = fieldVersion.IsVisible
+							sectionVersionResponseDto.Fields = append(sectionVersionResponseDto.Fields, fieldVersionsResponseDto)
+						}
+					}
+
+				}
+				moduleVersionResponseDto.Sections = append(moduleVersionResponseDto.Sections, sectionVersionResponseDto)
+			}
 		}
 
 		moduleVersionResponses = append(moduleVersionResponses, moduleVersionResponseDto)

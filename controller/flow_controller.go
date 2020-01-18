@@ -8,7 +8,8 @@ import (
 	"net/http"
 )
 
-type FlowController struct{}
+type FlowController struct {
+}
 
 /*
 This method fetches and returns all the flows associated with given merchant.

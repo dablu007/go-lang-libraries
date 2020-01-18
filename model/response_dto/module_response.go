@@ -7,6 +7,6 @@ type ModuleVersionResponseDto struct {
 	Version    string
 	ExternalId string
 	Status     enum.Status
-	Properties string
+	Properties []ModulePropertryResponseDto
 	Sections   []SectionVersionsResponseDto
 }
