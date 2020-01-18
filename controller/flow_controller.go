@@ -3,39 +3,36 @@ package controller
 import (
 	"flow/service"
 	"flow/utility"
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type FlowController struct {
+	flowService service.FlowService
 }
 
 /*
 This method fetches and returns all the flows associated with given merchant.
 */
-func (u FlowController) GetAllFlows() gin.HandlerFunc {
-	fmt.Print("Reached controller method")
+func (u FlowController) GetFlows() gin.HandlerFunc {
+	//Add log
 	fn := func(c *gin.Context) {
 		merchantId := c.Query("merchantId")
-		tenantId := c.Query("tenantId")
-		channel := c.Query("X-Channel")
 		if utility.IsValidUUID(merchantId) {
-			fmt.Print("merchantId is valid", merchantId)
-			flows := service.GetAllFlowsByMerchantId(merchantId, tenantId, channel)
-			c.JSON(http.StatusOK, gin.H{"message": "Successfully retrieved data!", "flows": flows})
-			return
+			//Add log
+			flows := u.flowService.GetMerchantFlows(merchantId)
+			if len(flows.FlowResponses) > 0 {
+				c.JSON(http.StatusOK, gin.H{"flows": flows})
+				return
+			} else {
+				c.JSON(http.StatusNotFound, gin.H{})
+				return
+			}
 		}
-		fmt.Print("InValid merchantId.")
+		//Add log
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
-	}
-	return fn
-}
-
-func (u FlowController) TeaPot() gin.HandlerFunc {
-	fn := func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Hi, I am a Teapot."})
 	}
 	return fn
 }
