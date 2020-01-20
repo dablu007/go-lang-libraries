@@ -1,8 +1,10 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
 	"flow/config"
+	"flow/logger"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Init() {
@@ -12,6 +14,6 @@ func Init() {
 	r.Use(gin.Recovery())
 	err := r.Run(serverConfig.GetString("server.port"))
 	if err != nil {
-		// logger.SugarLogger.Error("Server not able to startup with error: ", err)
+		logger.SugarLogger.Error("Server not able to startup with error: ", err)
 	}
 }

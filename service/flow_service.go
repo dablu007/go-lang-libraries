@@ -25,6 +25,7 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 			TenantId:  tenantId,
 			ChannelId: channelId}
 
+		redisClient.Expire(redisKey.ToString(), 0)
 		cachedFlow, err := redisClient.Get(redisKey.ToString()).Result()
 		if err != nil {
 			logger.SugarLogger.Info(methodName, "Failed to fetch flows from redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
@@ -36,7 +37,7 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 				TenantId:   tenantId,
 				ChannelId:  channelId}
 			flows := FetchAllFlowsFromDB(flowContext)
-			flowsResponse, err := GetParsedMerchantFlows(flows)
+			flowsResponse, err := GetParsedFlowsResponse(flows)
 			if err != nil {
 				logger.SugarLogger.Info(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
 			} else {
@@ -68,7 +69,7 @@ func FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
 	return flows
 }
 
-func GetParsedMerchantFlows(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
+func GetParsedFlowsResponse(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
 	dbConnection := db.GetDB()
 	var response response_dto.FlowResponsesDto
 	for _, flow := range flows {
