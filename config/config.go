@@ -15,7 +15,7 @@ var config *viper.Viper
 
 func Init(service, env string) {
 	var bodyBytes []byte
-	configFile, err := http.Get("http://configurations.zestmoney.in:8888/" + service + "/" + env)
+	configFile, err := http.Get("http://configuration.zestmoney.in:8888/" + service + "/" + env)
 	if err != nil {
 		log.Print("Error fetching configuration from server for service : " + service + " env : " + env)
 		bodyBytes, err = ioutil.ReadFile("config/config.json")
