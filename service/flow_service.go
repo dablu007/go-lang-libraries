@@ -23,7 +23,6 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 		redisKey := model.RedisKey{MerchantId: merchantId,
 			TenantId:  tenantId,
 			ChannelId: channelId}
-
 		cachedFlow, err := redisClient.Get(redisKey.ToString()).Result()
 		if err != nil {
 			logger.SugarLogger.Info(methodName, "Failed to fetch flows from redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)

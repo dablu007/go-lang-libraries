@@ -17,6 +17,7 @@ CREATE TABLE flows(
 CREATE TABLE fields(
  	id        SERIAL PRIMARY KEY NOT NULL,
 	name      VARCHAR NOT NULL,
+	status    VARCHAR NOT NULL,
 	tenant_id UUID UNIQUE DEFAULT NULL, 
 	created_on TIMESTAMP NOT NULL,
 	deleted_on TIMESTAMP DEFAULT NULL
@@ -38,6 +39,7 @@ CREATE TABLE sections(
    	id        SERIAL PRIMARY KEY NOT NULL,
 	name      VARCHAR NOT NULL,
 	tenant_id  UUID UNIQUE DEFAULT NULL,
+	status    VARCHAR NOT NULL,
 	created_on TIMESTAMP NOT NULL,
 	deleted_on TIMESTAMP DEFAULT NULL
 );

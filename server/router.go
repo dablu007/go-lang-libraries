@@ -11,7 +11,6 @@ func NewRouter() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	// logger.InitLogger()
 	health := new(controller.HealthController)
 
 	router.GET("flow/health", health.Status)

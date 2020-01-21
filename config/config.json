@@ -20,7 +20,7 @@
           "database.url": "localhost",
           "database.name": "flow",
           "log.file.path": "/var/log/",
-          "log.file.name": "finbox.log",
+          "log.file.name": "flow.log",
           "log.file.maxsize": 10,
           "log.file.maxbackup": 5,
           "log.file.maxage": 30
