@@ -1,6 +1,7 @@
 package server
 
 import (
+	"flow/auth"
 	"flow/controller"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ func NewRouter() *gin.Engine {
 	health := new(controller.HealthController)
 
 	router.GET("flow/health", health.Status)
-	// router.Use(auth.AuthMiddleware())
+	router.Use(auth.AuthMiddleware())
 
 	v1 := router.Group("flow/api/v1")
 	{
