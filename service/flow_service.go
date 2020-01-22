@@ -9,8 +9,7 @@ import (
 )
 
 type FlowService struct {
-	redisKey        model.RedisKey
-	flowServiceUtil FlowServiceUtil
+	FlowServiceUtil FlowServiceUtil
 }
 
 func (u FlowService) GetFlows(merchantId string, tenantId string, channelId string) response_dto.FlowResponsesDto {
@@ -33,8 +32,8 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 				MerchantId: merchantId,
 				TenantId:   tenantId,
 				ChannelId:  channelId}
-			flows := u.flowServiceUtil.FetchAllFlowsFromDB(flowContext)
-			flowsResponse, err := u.flowServiceUtil.GetParsedFlowsResponse(flows)
+			flows := u.FlowServiceUtil.FetchAllFlowsFromDB(flowContext)
+			flowsResponse, err := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
 			if err != nil {
 				logger.SugarLogger.Info(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
 			} else {

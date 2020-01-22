@@ -10,7 +10,7 @@ import (
 )
 
 type FlowServiceUtil struct {
-	mapUtil utility.MapUtil
+	MapUtil utility.MapUtil
 }
 
 func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
@@ -48,7 +48,7 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		}
 	}
 
-	dbConnection.Joins("JOIN modules ON modules.id = module_versions.module_id and modules.status = ? and modules.deleted_on is NULL", enum.Active).Where("module_versions.id in (?) and module_versions.deleted_on is NULL", f.mapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
+	dbConnection.Joins("JOIN modules ON modules.id = module_versions.module_id and modules.status = ? and modules.deleted_on is NULL", enum.Active).Where("module_versions.id in (?) and module_versions.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
 
 	for _, mv := range moduleVersions {
 		moduleVersionsMap[mv.Id] = mv
@@ -61,7 +61,7 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		}
 	}
 
-	dbConnection.Joins("JOIN sections ON sections.id = section_versions.section_id and sections.status = ? and sections.deleted_on is NULL", enum.Active).Where("section_versions.id in (?) and section_versions.deleted_on is NULL", f.mapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
+	dbConnection.Joins("JOIN sections ON sections.id = section_versions.section_id and sections.status = ? and sections.deleted_on is NULL", enum.Active).Where("section_versions.id in (?) and section_versions.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
 
 	for _, sv := range sectionVersions {
 		sectionVersionsMap[sv.Id] = sv
@@ -74,7 +74,7 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		}
 	}
 
-	dbConnection.Joins("JOIN fields ON fields.id = field_versions.field_id and fields.status = ? and fields.deleted_on is NULL", enum.Active).Where("field_versions.id in (?) and field_versions.deleted_on is NULL", f.mapUtil.GetKeyListFromKeyValueMap(completeFieldVersionNumberList)).Find(&fieldVersions)
+	dbConnection.Joins("JOIN fields ON fields.id = field_versions.field_id and fields.status = ? and fields.deleted_on is NULL", enum.Active).Where("field_versions.id in (?) and field_versions.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeFieldVersionNumberList)).Find(&fieldVersions)
 
 	for _, fv := range fieldVersions {
 		fieldVersionsMap[fv.Id] = fv
