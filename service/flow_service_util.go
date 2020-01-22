@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flow/db"
 	"flow/enum"
+	"flow/logger"
 	"flow/model"
 	"flow/model/response_dto"
 	"flow/utility"
@@ -14,6 +15,8 @@ type FlowServiceUtil struct {
 }
 
 func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
+	methodName := "FetchAllFlowsFromDB:"
+	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow context ", flowContext)
 	dbConnection := db.GetDB()
 	var flows []model.Flow
 	if dbConnection == nil {
@@ -24,6 +27,8 @@ func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []mo
 }
 
 func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
+	methodName := "GetParsedFlowsResponse"
+	logger.SugarLogger.Info(methodName, "fetching the response for flow")
 	dbConnection := db.GetDB()
 	completeModuleVersionNumberList := make(map[int]bool)
 	var moduleVersions []model.ModuleVersion
@@ -38,39 +43,48 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 	fieldVersionsMap := make(map[int]model.FieldVersion)
 
 	var response response_dto.FlowResponsesDto
+	var versionNumbersList []int
 	for _, flow := range flows {
 		var versionNumbers []int
 		json.Unmarshal([]byte(flow.ModuleVersions), &versionNumbers)
-		for _, num := range versionNumbers {
-			if completeModuleVersionNumberList[num] == false {
-				completeModuleVersionNumberList[num] = true
-			}
+		versionNumbersList = append(versionNumbersList, versionNumbers...)
+	}
+	logger.SugarLogger.Info(methodName, "list of modules ", versionNumbersList)
+	for _, num := range versionNumbersList {
+		if completeModuleVersionNumberList[num] == false {
+			completeModuleVersionNumberList[num] = true
 		}
 	}
-
 	dbConnection.Joins("JOIN module ON module.id = module_version.module_id and module.status = ? and module.deleted_on is NULL", enum.Active).Where("module_version.id in (?) and module_version.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
 
+	var sectionNumberList []int
 	for _, mv := range moduleVersions {
 		moduleVersionsMap[mv.Id] = mv
 		var sectionNumbers []int
 		json.Unmarshal([]byte(mv.SectionVersions), &sectionNumbers)
-		for _, num := range sectionNumbers {
-			if completeSectionVersionNumberList[num] == false {
-				completeSectionVersionNumberList[num] = true
-			}
+		sectionNumberList = append(sectionNumberList, sectionNumbers...)
+	}
+	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
+	for _, num := range sectionNumberList {
+		if completeSectionVersionNumberList[num] == false {
+			completeSectionVersionNumberList[num] = true
 		}
 	}
 
 	dbConnection.Joins("JOIN section ON section.id = section_version.section_id and section.status = ? and section.deleted_on is NULL", enum.Active).Where("section_version.id in (?) and section_version.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
 
+	var fieldNumbersList []int
 	for _, sv := range sectionVersions {
 		sectionVersionsMap[sv.Id] = sv
 		var fieldNumbers []int
 		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
-		for _, num := range fieldNumbers {
-			if completeFieldVersionNumberList[num] == false {
-				completeFieldVersionNumberList[num] = true
-			}
+		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
+	}
+
+	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
+	for _, num := range fieldNumbersList {
+		if completeFieldVersionNumberList[num] == false {
+			completeFieldVersionNumberList[num] = true
 		}
 	}
 
@@ -138,5 +152,6 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		}
 		response.FlowResponses = append(response.FlowResponses, flowResponseDto)
 	}
+	logger.SugarLogger.Info(methodName, "Returning the response ", response)
 	return response, nil
 }

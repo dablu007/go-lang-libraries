@@ -1,11 +1,16 @@
 package utility
 
-import "regexp"
+import (
+	"flow/logger"
+	"regexp"
+)
 
 type RequestValidator struct {
 }
 
 func (u RequestValidator)IsValidRequest(merchantId string, tenantId string, channelId string) bool{
+	methodName := "IsValidRequest:"
+	logger.SugarLogger.Info(methodName, " Validating the request for merchant ", merchantId, " tenantId ", tenantId , " and channel ", channelId)
 	if !IsValidUUID(merchantId){
 		return false
 	}
