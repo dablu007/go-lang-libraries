@@ -24,7 +24,7 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 			ChannelId: channelId}
 		cachedFlow, err := redisClient.Get(redisKey.ToString()).Result()
 		if err != nil {
-			logger.SugarLogger.Info(methodName, "Failed to fetch flows from redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
+			logger.SugarLogger.Info(methodName, "Failed to fetch flow from redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
 		}
 		if cachedFlow == "" {
 			logger.SugarLogger.Info(methodName, "No flows exist in redis cache for merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId)
