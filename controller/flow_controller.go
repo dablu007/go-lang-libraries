@@ -24,6 +24,7 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 		channelId := c.Query("channelId")
 		logger.SugarLogger.Info(methodName, "Recieved request to get all the flows associated with merchant: ", merchantId)
 		if u.requestValidator.IsValidRequest(merchantId, tenantId, channelId) {
+			logger.SugarLogger.Info(methodName, "Request is validated")
 			flows := u.flowService.GetFlows(merchantId, tenantId, channelId)
 			if len(flows.FlowResponses) > 0 {
 				c.JSON(http.StatusOK, gin.H{"flows": flows})

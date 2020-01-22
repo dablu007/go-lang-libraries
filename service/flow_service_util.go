@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flow/db"
 	"flow/enum"
+	"flow/logger"
 	"flow/model"
 	"flow/model/response_dto"
 	"flow/utility"
@@ -14,6 +15,8 @@ type FlowServiceUtil struct {
 }
 
 func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
+	methodName := "FetchAllFlowsFromDB:"
+	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow context ", flowContext)
 	dbConnection := db.GetDB()
 	var flows []model.Flow
 	if dbConnection == nil {
@@ -24,6 +27,8 @@ func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []mo
 }
 
 func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
+	methodName := "GetParsedFlowsResponse"
+	logger.SugarLogger.Info(methodName, "fetching the response for flow")
 	dbConnection := db.GetDB()
 	completeModuleVersionNumberList := make(map[int]bool)
 	var moduleVersions []model.ModuleVersion
@@ -44,13 +49,12 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		json.Unmarshal([]byte(flow.ModuleVersions), &versionNumbers)
 		versionNumbersList = append(versionNumbersList, versionNumbers...)
 	}
-
+	logger.SugarLogger.Info(methodName, "list of modules ", versionNumbersList)
 	for _, num := range versionNumbersList {
 		if completeModuleVersionNumberList[num] == false {
 			completeModuleVersionNumberList[num] = true
 		}
 	}
-	logrs.Println("fetching from db")
 	dbConnection.Joins("JOIN module ON module.id = module_version.module_id and module.status = ? and module.deleted_on is NULL", enum.Active).Where("module_version.id in (?) and module_version.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
 
 	var sectionNumberList []int
@@ -60,6 +64,7 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		json.Unmarshal([]byte(mv.SectionVersions), &sectionNumbers)
 		sectionNumberList = append(sectionNumberList, sectionNumbers...)
 	}
+	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
 	for _, num := range sectionNumberList {
 		if completeSectionVersionNumberList[num] == false {
 			completeSectionVersionNumberList[num] = true
@@ -76,6 +81,7 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
 	}
 
+	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
 	for _, num := range fieldNumbersList {
 		if completeFieldVersionNumberList[num] == false {
 			completeFieldVersionNumberList[num] = true
@@ -146,5 +152,6 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 		}
 		response.FlowResponses = append(response.FlowResponses, flowResponseDto)
 	}
+	logger.SugarLogger.Info(methodName, "Returning the response ", response)
 	return response, nil
 }
