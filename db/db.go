@@ -35,7 +35,7 @@ func Init() {
 		log.Fatal(" Not able to fetch the working directory")
 		return
 	}
-	db.SingularTable(false)
+	db.SingularTable(true)
 	workingDir = workingDir + "/db/migrations"
 	migrateConf := &goose.DBConf{
 		MigrationsDir: workingDir,
