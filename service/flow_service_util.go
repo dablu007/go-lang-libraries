@@ -38,39 +38,47 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 	fieldVersionsMap := make(map[int]model.FieldVersion)
 
 	var response response_dto.FlowResponsesDto
+	var versionNumbersList []int
 	for _, flow := range flows {
 		var versionNumbers []int
 		json.Unmarshal([]byte(flow.ModuleVersions), &versionNumbers)
-		for _, num := range versionNumbers {
-			if completeModuleVersionNumberList[num] == false {
-				completeModuleVersionNumberList[num] = true
-			}
-		}
+		versionNumbersList = append(versionNumbersList, versionNumbers...)
 	}
 
+	for _, num := range versionNumbersList {
+		if completeModuleVersionNumberList[num] == false {
+			completeModuleVersionNumberList[num] = true
+		}
+	}
+	logrs.Println("fetching from db")
 	dbConnection.Joins("JOIN module ON module.id = module_version.module_id and module.status = ? and module.deleted_on is NULL", enum.Active).Where("module_version.id in (?) and module_version.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
 
+	var sectionNumberList []int
 	for _, mv := range moduleVersions {
 		moduleVersionsMap[mv.Id] = mv
 		var sectionNumbers []int
 		json.Unmarshal([]byte(mv.SectionVersions), &sectionNumbers)
-		for _, num := range sectionNumbers {
-			if completeSectionVersionNumberList[num] == false {
-				completeSectionVersionNumberList[num] = true
-			}
+		sectionNumberList = append(sectionNumberList, sectionNumbers...)
+	}
+	for _, num := range sectionNumberList {
+		if completeSectionVersionNumberList[num] == false {
+			completeSectionVersionNumberList[num] = true
 		}
 	}
 
 	dbConnection.Joins("JOIN section ON section.id = section_version.section_id and section.status = ? and section.deleted_on is NULL", enum.Active).Where("section_version.id in (?) and section_version.deleted_on is NULL", f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
 
+	var fieldNumbersList []int
 	for _, sv := range sectionVersions {
 		sectionVersionsMap[sv.Id] = sv
 		var fieldNumbers []int
 		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
-		for _, num := range fieldNumbers {
-			if completeFieldVersionNumberList[num] == false {
-				completeFieldVersionNumberList[num] = true
-			}
+		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
+	}
+
+	for _, num := range fieldNumbersList {
+		if completeFieldVersionNumberList[num] == false {
+			completeFieldVersionNumberList[num] = true
 		}
 	}
 
