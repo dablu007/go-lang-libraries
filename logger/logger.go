@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"flow/config"
 	logrs "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -34,12 +34,11 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLogWriter() zapcore.WriteSyncer {
-	configData := config.GetConfig()
-	logFilePath := configData.GetString("log.file.path")
-	logFileName := configData.GetString("log.file.name")
-	logFileMaxSize := configData.GetInt("log.file.maxsize")
-	logFileMaxBackups := configData.GetInt("log.file.maxbackup")
-	logFileMaxAge := configData.GetInt("log.file.maxage")
+	logFilePath := viper.GetString("log.file.path")
+	logFileName := viper.GetString("log.file.name")
+	logFileMaxSize := viper.GetInt("log.file.maxsize")
+	logFileMaxBackups := viper.GetInt("log.file.maxbackup")
+	logFileMaxAge := viper.GetInt("log.file.maxage")
 	logFile := path.Join(logFilePath, logFileName)
 	lumberJackLogger := &lumberjack.Logger{
 		Filename: logFile,

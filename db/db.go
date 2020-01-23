@@ -2,13 +2,13 @@ package db
 
 import (
 	"bitbucket.org/liamstask/goose/lib/goose"
-	"flow/config"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/lib/pq"
 	logrs "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"log"
 	"os"
 )
@@ -17,12 +17,10 @@ var db *gorm.DB
 var err error
 
 func Init() {
-	config := config.GetConfig()
-	dbUserName := config.GetString("database.username")
-	dbPassword := config.GetString("database.password")
-	dbUrl := config.GetString("database.url")
-	dbName := config.GetString("database.name")
-
+	dbUserName := viper.GetString("database.username")
+	dbPassword := viper.GetString("database.password")
+	dbUrl := viper.GetString("database.url")
+	dbName := viper.GetString("database.name")
 	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", dbUrl, dbUserName, dbName, dbPassword) //Build connection string
 
 	//dbConnectionString := dbUserName + ":" + dbPassword + "@tcp(" + dbUrl + ")/" + dbName

@@ -1,14 +1,14 @@
 package auth
 
 import (
-	"flow/config"
 	"encoding/json"
 	"errors"
 	"fmt"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
-	"net/http"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"net/http"
 )
 
 var jwtMiddleWare *jwtmiddleware.JWTMiddleware
@@ -32,18 +32,17 @@ type CustomClaims struct {
 }
 
 func Init() {
-	config := config.GetConfig()
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
 			// Verify 'aud' claim
-			aud := config.GetString("JwksAudience")
+			aud := viper.GetString("JwksAudience")
 			checkAud := token.Claims.(jwt.MapClaims).VerifyAudience(aud, false)
 			fmt.Println(checkAud)
 			if !checkAud {
 				return token, errors.New("Invalid audience.")
 			}
 			// Verify 'iss' claim
-			iss := config.GetString("JwksIssuer")
+			iss := viper.GetString("JwksIssuer")
 			checkIss := token.Claims.(jwt.MapClaims).VerifyIssuer(iss, false)
 			if !checkIss {
 				return token, errors.New("Invalid issuer.")
@@ -79,9 +78,8 @@ func AuthMiddleware() gin.HandlerFunc {
 }
 
 func getPemCert(token *jwt.Token) (string, error) {
-	config := config.GetConfig()
 	cert := ""
-	resp, err := http.Get(config.GetString("JwksUrl"))
+	resp, err := http.Get(viper.GetString("JwksUrl"))
 
 	if err != nil {
 		return cert, err
