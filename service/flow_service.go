@@ -38,7 +38,7 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 		flows := u.FlowServiceUtil.FetchAllFlowsFromDB(flowContext)
 		flowsResponse, err := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
 		if err != nil {
-			logger.SugarLogger.Info(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
+			logger.SugarLogger.Error(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
 			return flowsResponse
 		}
 		//Do not set redis key when there is no entry for given flowContext.
@@ -47,11 +47,14 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 		}
 
 		response, err := json.Marshal(flowsResponse)
-		if err == nil {
-			logger.SugarLogger.Info(methodName, " Adding redis key: ",redisKey.ToString())
-			setStatus := redisClient.Set(redisKey.ToString(), response, 0)
-			logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ",redisKey.ToString())
+		if err != nil{
+			logger.SugarLogger.Error(methodName, " couldn't update redis as failed to marshal response with err: ", err)
+			return flowsResponse
 		}
+		
+		logger.SugarLogger.Info(methodName, " Adding redis key: ",redisKey.ToString())
+		setStatus := redisClient.Set(redisKey.ToString(), response, 0)
+		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ",redisKey.ToString())
 		return flowsResponse
 	}
 	logger.SugarLogger.Info(methodName, " UnMarshlling the cached flow response")
