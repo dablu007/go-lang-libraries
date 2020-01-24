@@ -39,14 +39,18 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 		flowsResponse, err := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
 		if err != nil {
 			logger.SugarLogger.Info(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
-		} else {
-			//Add expiry time for cache entry.
-			response, err := json.Marshal(flowsResponse)
-			if err == nil {
-				logger.SugarLogger.Info(methodName, " Updating the redis client with the response")
-				setStatus := redisClient.Set(redisKey.ToString(), response, 0)
-				logger.SugarLogger.Info(methodName, " set redis status: ", setStatus.Val())
-			}
+			return flowsResponse
+		}
+		//Do not set redis key when there is no entry for given flowContext.
+		if len(flowsResponse.FlowResponses) == 0 {
+			return flowsResponse
+		}
+
+		response, err := json.Marshal(flowsResponse)
+		if err == nil {
+			logger.SugarLogger.Info(methodName, " Updating the redis client with the response")
+			setStatus := redisClient.Set(redisKey.ToString(), response, 0)
+			logger.SugarLogger.Info(methodName, " set redis status: ", setStatus.Val())
 		}
 		return flowsResponse
 	}
