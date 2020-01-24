@@ -27,7 +27,7 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 			logger.SugarLogger.Info(methodName, "Request is validated")
 			flows := u.flowService.GetFlows(merchantId, tenantId, channelId)
 			if len(flows.FlowResponses) > 0 {
-				c.JSON(http.StatusOK, gin.H{"flows": flows})
+				c.JSON(http.StatusOK, flows)
 				return
 			} else {
 				c.JSON(http.StatusNotFound, gin.H{})

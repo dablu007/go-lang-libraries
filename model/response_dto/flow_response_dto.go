@@ -7,9 +7,9 @@ import (
 )
 
 type FlowResponseDto struct {
-	Name       string
-	ExternalId uuid.UUID
-	Version    string
-	Type       enum.FlowType
-	Modules    []ModuleVersionResponseDto
+	Name       string                     `json:"name"`
+	ExternalId uuid.UUID                  `json:"external_id"`
+	Version    string                     `json:"version"`
+	Type       enum.FlowType              `json:"type"`
+	Modules    []ModuleVersionResponseDto `json:"modules"`
 }

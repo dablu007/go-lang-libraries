@@ -1,14 +1,13 @@
 package response_dto
 
 import (
-	"flow/model"
 	uuid "github.com/satori/go.uuid"
 )
 
 type FieldVersionsResponseDto struct {
-	Name       string
-	ExternalId uuid.UUID
-	IsVisible  bool
-	Version    string
-	Properties []model.Property
+	Name       string                 `json:"name"`
+	ExternalId uuid.UUID              `json:"external_id"`
+	IsVisible  bool                   `json:"is_visible"`
+	Version    string                 `json:"version"`
+	Properties []PropertryResponseDto `json:"properties"`
 }
