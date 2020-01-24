@@ -12,9 +12,11 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	health := new(controller.HealthController)
+	cacheController := new(controller.CacheController)
 
 	router.GET("flow/health", health.Status)
 	router.Use(auth.AuthMiddleware())
+	router.GET("flow/refresh", cacheController.ExpireCacheEntry())
 
 	v1 := router.Group("flow/api/v1")
 	{
