@@ -48,9 +48,9 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 
 		response, err := json.Marshal(flowsResponse)
 		if err == nil {
-			logger.SugarLogger.Info(methodName, " Updating the redis client with the response")
+			logger.SugarLogger.Info(methodName, " Adding redis key: ",redisKey.ToString())
 			setStatus := redisClient.Set(redisKey.ToString(), response, 0)
-			logger.SugarLogger.Info(methodName, " set redis status: ", setStatus.Val())
+			logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ",redisKey.ToString())
 		}
 		return flowsResponse
 	}
