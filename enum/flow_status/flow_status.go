@@ -1,9 +1,9 @@
 package flow_status
 
-type FlowStatus string
+type FlowStatus int
 
 const (
-	Draft    = "Draft"
-	Ative    = "Active"
-	Inactive = "Inactive"
+	Draft = iota //starts with 0
+	Inactive
+	Active
 )
