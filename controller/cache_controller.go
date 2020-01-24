@@ -18,14 +18,14 @@ type CacheController struct {
 This method will evict the cache entry for given flow context.
 */
 
-func (u CacheController) ExpireCacheEntry() gin.HandlerFunc {
-	methodName := "ExpireCacheEntry:"
+func (u CacheController) DeleteCacheEntry() gin.HandlerFunc {
+	methodName := "DeleteCacheEntry:"
 	fn := func(c *gin.Context) {
 		merchantId := c.Query("merchantId")
 		tenantId := c.Query("tenantId")
 		channelId := c.Query("channelId")
 		if u.requestValidator.IsValidRequest(merchantId, tenantId, channelId) {
-			logger.SugarLogger.Info(methodName, "Invalidating cache entry for merchant:", merchantId, " tenant:", tenantId, " channel: ", channelId)
+			logger.SugarLogger.Info(methodName, "Deleting cache entry for merchant:", merchantId, " tenant:", tenantId, " channel: ", channelId)
 			redisClient := cache.GetRedisClient()
 			if redisClient == nil {
 				logger.SugarLogger.Info(methodName, "Failed to connect with redis client. ")
