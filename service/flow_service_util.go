@@ -99,7 +99,7 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 			Name:       flow.Name,
 			ExternalId: flow.ExternalId,
 			Version:    flow.Version,
-			Type:       flow.Type}
+			Type:       flow.Type.String()}
 		var moduleVersionNumberList []int
 		json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionNumberList)
 		for _, mvn := range moduleVersionNumberList {
