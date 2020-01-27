@@ -37,7 +37,6 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 	completeSectionVersionNumberList := make(map[int]bool)
 	var sectionVersions []model.SectionVersion
 	sectionVersionsMap := make(map[int]model.SectionVersion)
-
 	completeFieldVersionNumberList := make(map[int]bool)
 	var fieldVersions []model.FieldVersion
 	fieldVersionsMap := make(map[int]model.FieldVersion)
