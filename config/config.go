@@ -1,54 +1,73 @@
 package config
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
-	"github.com/buger/jsonparser"
 	"github.com/spf13/viper"
 )
 
 var config *viper.Viper
 
 func Init(service, env string) {
-	var bodyBytes []byte
-	configFile, err := http.Get("http://configuration.zestmoney.in:8888/" + service + "/" + env)
+	url := ("http://configuration.zestmoney.in:8888/" + service + "/" + env)
+	fmt.Println("%s", url)
+	fmt.Println("Loading config from %s\n", url)
+	body, err := fetchConfiguration(url)
 	if err != nil {
-		log.Print("Error fetching configuration from server for service : " + service + " env : " + env)
+		fmt.Println("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
+	}
+	parseConfiguration(body)
+}
+// Make HTTP request to fetch configuration from config server
+func fetchConfiguration(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	var bodyBytes []byte
+	if err != nil {
+		//panic("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
 		bodyBytes, err = ioutil.ReadFile("config/config.json")
 		if err != nil {
-			log.Fatal("Couldn't read local configuration file.", err)
+			fmt.Println("Couldn't read local configuration file.", err)
 		} else {
 			log.Print("using local config.")
 		}
 	} else {
-		if configFile != nil {
-			bodyBytes, err = ioutil.ReadAll(configFile.Body)
+		if resp != nil {
+			bodyBytes, err = ioutil.ReadAll(resp.Body)
 			if err != nil {
-				log.Fatal("Error reading configuration response body.")
+				fmt.Println("Error reading configuration response body.")
 			}
 		}
 	}
-
-	config = viper.New()
-	config.SetConfigType("json")
-	config.SetConfigName(env)
-	fmt.Print("body:", string(bodyBytes))
-	parsedConfig, _, _, parseErr := jsonparser.Get(bodyBytes, "propertySources", "[0]", "source")
-	if parseErr != nil {
-		log.Fatal("Failed to parse config JSON: ", parseErr)
-	}
-
-	//err = config.ReadConfig(bytes.NewBuffer(parsedConfig))
-	err = config.ReadConfig(bytes.NewReader(parsedConfig))
+	return bodyBytes, err
+}
+// Pass JSON bytes into struct and then into Viper
+func parseConfiguration(body []byte) {
+	var cloudConfig springCloudConfig
+	err := json.Unmarshal(body, &cloudConfig)
 	if err != nil {
-		log.Fatal("Failed to reading config: ", err)
+		fmt.Println("Cannot parse configuration, message: " + err.Error())
+	}
+	for key, value := range cloudConfig.PropertySources[0].Source {
+		viper.Set(key, value)
+		fmt.Println("Loading config property %v => %v\n", key, value)
+	}
+	if viper.IsSet("server_name") {
+		fmt.Println("Successfully loaded configuration for service %s\n", viper.GetString("server_name"))
 	}
 }
-
-func GetConfig() *viper.Viper {
-	return config
+// Structs having same structure as response from Spring Cloud Config
+type springCloudConfig struct {
+	Name            string           `json:"name"`
+	Profiles        []string         `json:"profiles"`
+	Label           string           `json:"label"`
+	Version         string           `json:"version"`
+	PropertySources []propertySource `json:"propertySources"`
+}
+type propertySource struct {
+	Name   string                 `json:"name"`
+	Source map[string]interface{} `json:"source"`
 }
