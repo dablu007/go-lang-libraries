@@ -2,7 +2,7 @@ package config
 
 import (
 	"encoding/json"
-	"flow/logger"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,11 +14,11 @@ var config *viper.Viper
 
 func Init(service, env string) {
 	url := ("http://configuration.zestmoney.in:8888/" + service + "/" + env)
-	logger.SugarLogger.Info("%s", url)
-	logger.SugarLogger.Info("Loading config from %s\n", url)
+	fmt.Println("%s", url)
+	fmt.Println("Loading config from %s\n", url)
 	body, err := fetchConfiguration(url)
 	if err != nil {
-		logger.SugarLogger.Info("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
+		fmt.Println("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
 	}
 	parseConfiguration(body)
 }
@@ -30,7 +30,7 @@ func fetchConfiguration(url string) ([]byte, error) {
 		//panic("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
 		bodyBytes, err = ioutil.ReadFile("config/config.json")
 		if err != nil {
-			logger.SugarLogger.Fatal("Couldn't read local configuration file.", err)
+			fmt.Println("Couldn't read local configuration file.", err)
 		} else {
 			log.Print("using local config.")
 		}
@@ -38,7 +38,7 @@ func fetchConfiguration(url string) ([]byte, error) {
 		if resp != nil {
 			bodyBytes, err = ioutil.ReadAll(resp.Body)
 			if err != nil {
-				logger.SugarLogger.Fatal("Error reading configuration response body.")
+				fmt.Println("Error reading configuration response body.")
 			}
 		}
 	}
@@ -49,14 +49,14 @@ func parseConfiguration(body []byte) {
 	var cloudConfig springCloudConfig
 	err := json.Unmarshal(body, &cloudConfig)
 	if err != nil {
-		logger.SugarLogger.Info("Cannot parse configuration, message: " + err.Error())
+		fmt.Println("Cannot parse configuration, message: " + err.Error())
 	}
 	for key, value := range cloudConfig.PropertySources[0].Source {
 		viper.Set(key, value)
-		logger.SugarLogger.Info("Loading config property %v => %v\n", key, value)
+		fmt.Println("Loading config property %v => %v\n", key, value)
 	}
 	if viper.IsSet("server_name") {
-		logger.SugarLogger.Info("Successfully loaded configuration for service %s\n", viper.GetString("server_name"))
+		fmt.Println("Successfully loaded configuration for service %s\n", viper.GetString("server_name"))
 	}
 }
 // Structs having same structure as response from Spring Cloud Config
