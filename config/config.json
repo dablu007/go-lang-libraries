@@ -23,7 +23,8 @@
           "log.file.name": "flow.log",
           "log.file.maxsize": 10,
           "log.file.maxbackup": 5,
-          "log.file.maxage": 30
+          "log.file.maxage": 30,
+          "redis.url": "chache-poc-golang.wpfjkv.ng.0001.aps1.cache.amazonaws.com:6379"
         }
       }
     ]

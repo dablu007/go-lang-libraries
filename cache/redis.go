@@ -1,15 +1,18 @@
 package cache
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/spf13/viper"
+)
 
 import "github.com/go-redis/redis/v7"
 
 var client *redis.Client
 
 func Init() {
+	redisUrl := viper.GetString("redis.url")
 	client = redis.NewClient(&redis.Options{
-		//Addr: "127.0.0.1:6379",
-		Addr: "chache-poc-golang.wpfjkv.ng.0001.aps1.cache.amazonaws.com:6379",
+		Addr: redisUrl,
 		DB:   0, // use default DB
 	})
 
