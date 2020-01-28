@@ -3,8 +3,12 @@ package server
 import (
 	"flow/auth"
 	"flow/controller"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/newrelic/go-agent"
+	"github.com/newrelic/go-agent/_integrations/nrgin/v1"
+	"github.com/spf13/viper"
+	"os"
 )
 
 func NewRouter() *gin.Engine {
@@ -13,7 +17,15 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Recovery())
 	health := new(controller.HealthController)
 	cacheController := new(controller.CacheController)
-
+	appName := "Flow CJM"
+	cfg := newrelic.NewConfig(appName, viper.GetString("newrelic.licensekey"))
+	cfg.Logger = newrelic.NewDebugLogger(os.Stdout)
+	app, err := newrelic.NewApplication(cfg)
+	if nil != err {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	router.Use(nrgin.Middleware(app))
 	router.GET("flow/health", health.Status)
 	router.Use(auth.AuthMiddleware())
 	router.GET("flow/refresh", cacheController.DeleteCacheEntry())

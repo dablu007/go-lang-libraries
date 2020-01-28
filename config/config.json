@@ -24,7 +24,8 @@
           "log.file.maxsize": 10,
           "log.file.maxbackup": 5,
           "log.file.maxage": 30,
-          "redis.url": "chache-poc-golang.wpfjkv.ng.0001.aps1.cache.amazonaws.com:6379"
+          "redis.url": "chache-poc-golang.wpfjkv.ng.0001.aps1.cache.amazonaws.com:6379",
+          "newrelic.licensekey": "3034ebbda9d4b56fa3eb5dc7b2e073147c8fd57e"
         }
       }
     ]
