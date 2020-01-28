@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -21,6 +22,22 @@ func Init(service, env string) {
 		fmt.Println("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
 	}
 	parseConfiguration(body)
+}
+
+func InitAuthConfig(env string)  {
+	var url string
+	if strings.EqualFold(env, "production"){
+		url = "https://authentication.zestmoney.in/.well-known/openid-configuration"
+	} else {
+		url = "https://staging-auth.zestmoney.in/.well-known/openid-configuration"
+	}
+	fmt.Println("%s", url)
+	fmt.Println("Loading config from %s\n", url)
+	body, err := fetchConfiguration(url)
+	if err != nil {
+		fmt.Println("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
+	}
+	parseConfigurationAuth(body)
 }
 // Make HTTP request to fetch configuration from config server
 func fetchConfiguration(url string) ([]byte, error) {
@@ -57,6 +74,21 @@ func parseConfiguration(body []byte) {
 	}
 	if viper.IsSet("server_name") {
 		fmt.Println("Successfully loaded configuration for service %s\n", viper.GetString("server_name"))
+	}
+}
+
+func parseConfigurationAuth(body []byte) {
+	var jsonConfig map[string]interface{}
+	err := json.Unmarshal(body, &jsonConfig)
+	if err != nil {
+		fmt.Println("Cannot parse configuration, message: " + err.Error())
+	}
+	for key, value := range jsonConfig {
+		viper.Set(key, value)
+		fmt.Println("Loading config property %v => %v\n", key, value)
+	}
+	if viper.IsSet("jwks_uri") {
+		fmt.Println("Successfully loaded configuration for auth %s\n")
 	}
 }
 // Structs having same structure as response from Spring Cloud Config
