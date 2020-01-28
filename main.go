@@ -26,7 +26,6 @@ func main() {
 	flag.Parse()
 
 	config.Init(service, environment)
-	config.InitAuthConfig(environment)
 	logger.InitLogger()
 	auth.Init()
 	flag.Parse()
