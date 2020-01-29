@@ -154,3 +154,137 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 	logger.SugarLogger.Info(methodName, "Returning the response ", response)
 	return response, nil
 }
+
+func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
+	methodName := "FetchFlowByIdFromDB:"
+	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow id ", flowExternalId)
+	dbConnection := db.GetDB()
+	var flow model.Flow
+	if dbConnection == nil {
+		return flow
+	}
+	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&flow)
+	return flow
+}
+
+func (f FlowServiceUtil) GetFlowModuleSectionAndFieldData(flow model.Flow) (response_dto.FlowResponseDto, error) {
+	methodName := "GetFlowModuleSectionAndFieldData"
+	logger.SugarLogger.Info(methodName, "fetching the response for flow data")
+	dbConnection := db.GetDB()
+	completeModuleVersionNumberList := make(map[int]bool)
+	var moduleVersions []model.ModuleVersion
+	moduleVersionsMap := make(map[int]model.ModuleVersion)
+
+	completeSectionVersionNumberList := make(map[int]bool)
+	var sectionVersions []model.SectionVersion
+	sectionVersionsMap := make(map[int]model.SectionVersion)
+	completeFieldVersionNumberList := make(map[int]bool)
+	var fieldVersions []model.FieldVersion
+	fieldVersionsMap := make(map[int]model.FieldVersion)
+
+	var moduleVersionList []int
+	json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionList)
+
+	logger.SugarLogger.Info(methodName, "list of modules ", moduleVersionList)
+	for _, num := range moduleVersionList {
+		if completeModuleVersionNumberList[num] == false {
+			completeModuleVersionNumberList[num] = true
+		}
+	}
+	dbConnection.Joins("JOIN module ON module.id = module_version.module_id ").Where("module_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
+
+	var sectionNumberList []int
+	for _, mv := range moduleVersions {
+		moduleVersionsMap[mv.Id] = mv
+		var sectionNumbers []int
+		json.Unmarshal([]byte(mv.SectionVersions), &sectionNumbers)
+		sectionNumberList = append(sectionNumberList, sectionNumbers...)
+	}
+	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
+	for _, num := range sectionNumberList {
+		if completeSectionVersionNumberList[num] == false {
+			completeSectionVersionNumberList[num] = true
+		}
+	}
+
+	dbConnection.Joins("JOIN section ON section.id = section_version.section_id").Where("section_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
+
+	var fieldNumbersList []int
+	for _, sv := range sectionVersions {
+		sectionVersionsMap[sv.Id] = sv
+		var fieldNumbers []int
+		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
+		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
+	}
+
+	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
+	for _, num := range fieldNumbersList {
+		if completeFieldVersionNumberList[num] == false {
+			completeFieldVersionNumberList[num] = true
+		}
+	}
+
+	dbConnection.Joins("JOIN field ON field.id = field_version.field_id ").Where("field_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeFieldVersionNumberList)).Find(&fieldVersions)
+
+	for _, fv := range fieldVersions {
+		fieldVersionsMap[fv.Id] = fv
+	}
+	flowResponseDto := response_dto.FlowResponseDto{
+		Name:       flow.Name,
+		ExternalId: flow.ExternalId,
+		Version:    flow.Version,
+		Type:       flow.Type.String()}
+	var moduleVersionNumberList []int
+	json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionNumberList)
+	for _, mvn := range moduleVersionNumberList {
+		if completeModuleVersionNumberList[mvn] == true {
+			moduleVersion := moduleVersionsMap[mvn]
+			if (model.ModuleVersion{}) == moduleVersion {
+				continue
+			}
+			moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{
+				Name:       moduleVersion.Name,
+				ExternalId: moduleVersion.ExternalId,
+				Version:    moduleVersion.Version}
+			json.Unmarshal([]byte(moduleVersion.Properties), &moduleVersionResponseDto.Properties)
+			var sectionVersionNumberList []int
+			json.Unmarshal([]byte(moduleVersion.SectionVersions), &sectionVersionNumberList)
+			for _, svn := range sectionVersionNumberList {
+				if completeSectionVersionNumberList[svn] == true {
+					sectionVersion := sectionVersionsMap[svn]
+					if (model.SectionVersion{}) == sectionVersion {
+						continue
+					}
+					sectionVersionResponseDto := response_dto.SectionVersionsResponseDto{
+						Name:       sectionVersion.Name,
+						ExternalId: sectionVersion.ExternalId,
+						Version:    sectionVersion.Version,
+						IsVisible:  sectionVersion.IsVisible}
+					json.Unmarshal([]byte(sectionVersion.Properties), &sectionVersionResponseDto.Properties)
+					var fieldVersionNumberList []int
+					json.Unmarshal([]byte(sectionVersion.FieldVersions), &fieldVersionNumberList)
+					for _, fvn := range fieldVersionNumberList {
+						if completeFieldVersionNumberList[fvn] == true {
+							fieldVersion := fieldVersionsMap[fvn]
+							if (model.FieldVersion{}) == fieldVersion {
+								continue
+							}
+							fieldVersionResponseDto := response_dto.FieldVersionsResponseDto{
+								Name:       fieldVersion.Name,
+								ExternalId: fieldVersion.ExternalId,
+								IsVisible:  fieldVersion.IsVisible,
+								Version:    fieldVersion.Version}
+							json.Unmarshal([]byte(fieldVersion.Properties), &fieldVersionResponseDto.Properties)
+							sectionVersionResponseDto.Fields = append(sectionVersionResponseDto.Fields, fieldVersionResponseDto)
+						}
+					}
+					moduleVersionResponseDto.Sections = append(moduleVersionResponseDto.Sections, sectionVersionResponseDto)
+				}
+			}
+			flowResponseDto.Modules = append(flowResponseDto.Modules, moduleVersionResponseDto)
+		}
+	}
+
+	logger.SugarLogger.Info(methodName, "Returning the response for flow data => ", flowResponseDto)
+	return flowResponseDto, nil
+}

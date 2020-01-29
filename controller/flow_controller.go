@@ -39,3 +39,20 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 	}
 	return fn
 }
+
+func (u FlowController) GetFlowById() gin.HandlerFunc  {
+	methodName := "GetFlowById:"
+	fn := func(c *gin.Context) {
+		flowId := c.Param("flowId")
+		logger.SugarLogger.Info(methodName, "Recieved request to get flow by flowId ", flowId)
+		flow := u.flowService.GetFlowById(flowId)
+		if len(flow.Name) > 0 {
+			c.JSON(http.StatusOK, flow)
+			return
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{})
+			return
+		}
+	}
+	return fn
+}
