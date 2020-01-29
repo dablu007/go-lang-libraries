@@ -1,8 +1,23 @@
 package enum
 
-type Status string
+type Status int
 
 const (
-	Active   = "Active"
-	Inactive = "Inactive"
+	Inactive = iota //starts with 0
+	Active
 )
+
+func (status Status) String() string {
+	// declare an array of strings
+	statuses := [...]string{
+		"Inactive",
+		"Active",
+	}
+
+	// prevent panicking in case of
+	// `status` is out of range
+	if status < Inactive || status > Active {
+		return "Unknown"
+	}
+	return statuses[status]
+}
