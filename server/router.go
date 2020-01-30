@@ -26,17 +26,17 @@ func NewRouter() *gin.Engine {
 		os.Exit(1)
 	}
 	router.Use(nrgin.Middleware(app))
-	router.GET("flow/health", health.Status)
+	router.GET("rest/flows/health", health.Status)
 	router.Use(auth.AuthMiddleware())
-	router.GET("flow/refresh", cacheController.DeleteCacheEntry())
+	router.GET("rest/flows/refresh", cacheController.DeleteCacheEntry())
 
-	v1 := router.Group("flow/api/v1")
+	v1 := router.Group("rest/v1")
 	{
 		group := v1.Group("/")
 		{
 			flowController := new(controller.FlowController)
 			group.GET("flows", flowController.GetFlows())
-			group.GET("flow/:flowId", flowController.GetFlowById())
+			group.GET("flows/:flowId", flowController.GetFlowById())
 
 		}
 	}

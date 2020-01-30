@@ -78,13 +78,22 @@ func (f FlowService) GetFlowById(flowExternalId string) response_dto.FlowRespons
 	}
 	if len(cachedFlow) == 0 {
 		flow := f.FlowServiceUtil.FetchFlowByIdFromDB(flowExternalId)
+		if len(flow.Name) <= 0 {
+			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", flowExternalId)
+			return flowsResponse
+		}
 		flowsResponse, err := f.FlowServiceUtil.GetFlowModuleSectionAndFieldData(flow)
 		if err != nil{
 			logger.SugarLogger.Error(methodName, " couldn't update redis as failed to marshal response with err: ", err)
 			return flowsResponse
 		}
+		response, err := json.Marshal(flowsResponse)
+		if err != nil{
+			logger.SugarLogger.Error(methodName, " failed to marshal response with err: will not be able to update redis", err)
+			return flowsResponse
+		}
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", flowExternalId)
-		setStatus := redisClient.Set(flowExternalId, flowsResponse, 0)
+		setStatus := redisClient.Set(flowExternalId, response, 0)
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", flowExternalId)
 		return flowsResponse
 	}
