@@ -3,7 +3,6 @@ package controller
 import (
 	"flow/cache"
 	"flow/logger"
-	"flow/model"
 	"flow/utility"
 	"net/http"
 
@@ -11,7 +10,7 @@ import (
 )
 
 type CacheController struct {
-	requestValidator utility.RequestValidator
+	RequestValidator utility.RequestValidator
 }
 
 /*
@@ -24,7 +23,7 @@ func (u CacheController) DeleteCacheEntry() gin.HandlerFunc {
 		merchantId := c.Query("merchantId")
 		tenantId := c.Query("tenantId")
 		channelId := c.Query("channelId")
-		if u.requestValidator.IsValidRequest(merchantId, tenantId, channelId) {
+		if u.RequestValidator.IsValidRequest(merchantId, tenantId, channelId) {
 			logger.SugarLogger.Info(methodName, "Deleting cache entry for merchant:", merchantId, " tenant:", tenantId, " channel: ", channelId)
 			redisClient := cache.GetRedisClient()
 			if redisClient == nil {
@@ -32,11 +31,8 @@ func (u CacheController) DeleteCacheEntry() gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "unable to connect to redis."})
 				return
 			}
-			redisKey := model.RedisKey{MerchantId: merchantId,
-				TenantId:  tenantId,
-				ChannelId: channelId}
-
-			_, err := redisClient.Del(redisKey.ToString()).Result()
+			redisKey := u.RequestValidator.GenerateRedisKey(merchantId, tenantId, channelId)
+			_, err := redisClient.Del(redisKey).Result()
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 				return
