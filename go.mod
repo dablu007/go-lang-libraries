@@ -9,6 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-redis/redis/v7 v7.0.0-beta.5
 	github.com/golang-migrate/migrate v3.5.4+incompatible
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kylelemons/go-gypsy v0.0.0-20160905020020-08cad365cd28 // indirect

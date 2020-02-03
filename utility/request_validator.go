@@ -8,16 +8,16 @@ import (
 type RequestValidator struct {
 }
 
-func (u RequestValidator)IsValidRequest(merchantId string, tenantId string, channelId string) bool{
+func (u RequestValidator) IsValidRequest(merchantId string, tenantId string, channelId string) bool {
 	methodName := "IsValidRequest:"
-	logger.SugarLogger.Info(methodName, " Validating the request for merchant ", merchantId, " tenantId ", tenantId , " and channel ", channelId)
-	if !IsValidUUID(merchantId){
+	logger.SugarLogger.Info(methodName, " Validating the request for merchant ", merchantId, " tenantId ", tenantId, " and channel ", channelId)
+	if !IsValidUUID(merchantId) {
 		return false
 	}
-	if !(tenantId == "" || IsValidUUID(tenantId)){
+	if !(tenantId == "" || IsValidUUID(tenantId)) {
 		return false
 	}
-	if !(channelId == "" || IsValidUUID(channelId)){
+	if !(channelId == "" || IsValidUUID(channelId)) {
 		return false
 	}
 	return true
@@ -28,16 +28,16 @@ func IsValidUUID(uuid string) bool {
 	return r.MatchString(uuid)
 }
 
-func (u RequestValidator)GenerateRedisKey(merchantId string, tenantId string, channelId string) string {
+func (u RequestValidator) GenerateRedisKey(merchantId string, tenantId string, channelId string) string {
 	var key = ""
 	if len(merchantId) > 0 {
 		key = key + merchantId + ":"
 	}
 	if len(tenantId) > 0 {
-		key = key +  tenantId + ":"
+		key = key + tenantId + ":"
 	}
 	if len(channelId) > 0 {
-		key = key +  tenantId
+		key = key + channelId
 	}
 	return key
 }
