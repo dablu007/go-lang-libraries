@@ -167,11 +167,11 @@ func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
 	return flow
 }
 
-func (f FlowServiceUtil) GetFlowModuleSectionAndFieldData(flow model.Flow,
+func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.Flow,
 	completeModuleVersionNumberList map[int]bool,moduleVersionsMap map[int]model.ModuleVersion,
 	completeSectionVersionNumberList map[int]bool,sectionVersionsMap map[int]model.SectionVersion,
 	completeFieldVersionNumberList map[int]bool,fieldVersionsMap map[int]model.FieldVersion) (response_dto.FlowResponseDto, error) {
-	methodName := "GetFlowModuleSectionAndFieldData"
+	methodName := "ConstructFlowResponseWithModuleFieldSection"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow data")
 
 	flowResponseDto := response_dto.FlowResponseDto{

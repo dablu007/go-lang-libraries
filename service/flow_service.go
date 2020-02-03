@@ -87,7 +87,7 @@ func (f FlowService) GetFlowById(flowExternalId string) response_dto.FlowRespons
 		sectionVersions, moduleVersionsMap, completeSectionVersionNumberList := f.FlowServiceUtil.FetchSectionsData(moduleVersions)
 		fieldVersions,sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.FlowServiceUtil.FetchFieldData(sectionVersions)
 		fmt.Println("==== ", fieldVersions)
-		flowsResponse, err := f.FlowServiceUtil.GetFlowModuleSectionAndFieldData(flow, completeModuleVersionNumberList,
+		flowsResponse, err := f.FlowServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
 			moduleVersionsMap, completeSectionVersionNumberList,sectionVersionsMap,completeFieldVersionNumberList,fieldVersionsMap)
 		if err != nil{
 			logger.SugarLogger.Error(methodName, " couldn't update redis as failed to marshal response with err: ", err)
