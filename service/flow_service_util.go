@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"flow/db"
+	"flow/db/repository"
 	"flow/enum"
 	"flow/logger"
 	"flow/model"
@@ -12,12 +13,16 @@ import (
 
 type FlowServiceUtil struct {
 	MapUtil utility.MapUtil
+	DBService db.DBService
+	FieldRepository repository.FieldRepository
+	ModuleRepository repository.ModuleRepository
+	SectionRepository repository.SectionRepository
 }
 
 func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
 	methodName := "FetchAllFlowsFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow context ", flowContext)
-	dbConnection := db.GetDB()
+	dbConnection := f.DBService.GetDB()
 	var flows []model.Flow
 	if dbConnection == nil {
 		return flows
@@ -29,7 +34,7 @@ func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []mo
 func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
 	methodName := "GetParsedFlowsResponse"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow")
-	dbConnection := db.GetDB()
+	dbConnection := f.DBService.GetDB()
 	completeModuleVersionNumberList := make(map[int]bool)
 	var moduleVersions []model.ModuleVersion
 	moduleVersionsMap := make(map[int]model.ModuleVersion)
@@ -158,12 +163,8 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
 	methodName := "FetchFlowByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow id ", flowExternalId)
-	dbConnection := db.GetDB()
 	var flow model.Flow
-	if dbConnection == nil {
-		return flow
-	}
-	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&flow)
+	flow = f.FieldRepository.FindByExternalId(flowExternalId)
 	return flow
 }
 
@@ -239,7 +240,6 @@ func (f FlowServiceUtil) FetchModuleData(flow model.Flow) ([]model.ModuleVersion
 	var moduleVersionList []int
 	completeModuleVersionNumberList := make(map[int]bool)
 	var moduleVersions []model.ModuleVersion
-	dbConnection := db.GetDB()
 	json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionList)
 
 	logger.SugarLogger.Info(methodName, "list of modules ", moduleVersionList)
@@ -248,7 +248,7 @@ func (f FlowServiceUtil) FetchModuleData(flow model.Flow) ([]model.ModuleVersion
 			completeModuleVersionNumberList[num] = true
 		}
 	}
-	dbConnection.Joins("JOIN module ON module.id = module_version.module_id ").Where("module_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
+	moduleVersions = f.ModuleRepository.FetchModuleFromModuleVersion(completeModuleVersionNumberList)
 	return moduleVersions,completeModuleVersionNumberList
 }
 
@@ -258,7 +258,6 @@ func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion)
 	moduleVersionsMap := make(map[int]model.ModuleVersion)
 	completeSectionVersionNumberList := make(map[int]bool)
 	var sectionVersions []model.SectionVersion
-	dbConnection := db.GetDB()
 	for _, mv := range moduleVersions {
 		moduleVersionsMap[mv.Id] = mv
 		var sectionNumbers []int
@@ -272,14 +271,13 @@ func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion)
 		}
 	}
 
-	dbConnection.Joins("JOIN section ON section.id = section_version.section_id").Where("section_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
+	sectionVersions = f.SectionRepository.FetchSectionFromSectionVersions(completeSectionVersionNumberList)
 	return sectionVersions, moduleVersionsMap, completeSectionVersionNumberList
 }
 
 
 func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) ([]model.FieldVersion, map[int]model.SectionVersion, map[int]bool, map[int]model.FieldVersion) {
 	methodName := "FetchFieldData"
-	dbConnection := db.GetDB()
 	sectionVersionsMap := make(map[int]model.SectionVersion)
 	var fieldNumbersList []int
 	completeFieldVersionNumberList := make(map[int]bool)
@@ -299,7 +297,7 @@ func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) 
 	fieldVersionsMap := make(map[int]model.FieldVersion)
 
 	var fieldVersions []model.FieldVersion
-	dbConnection.Joins("JOIN field ON field.id = field_version.field_id ").Where("field_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeFieldVersionNumberList)).Find(&fieldVersions)
+	fieldVersions = f.FieldRepository.FetchFieldFromFieldVersion(completeFieldVersionNumberList)
 
 	for _, fv := range fieldVersions {
 		fieldVersionsMap[fv.Id] = fv

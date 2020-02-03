@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	bitbucket.org/liamstask/goose v0.0.0-20150115234039-8488cc47d90c
+	github.com/DATA-DOG/go-sqlmock v1.4.1 // indirect
 	github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.5.0
