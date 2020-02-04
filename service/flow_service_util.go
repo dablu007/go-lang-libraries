@@ -12,10 +12,10 @@ import (
 )
 
 type FlowServiceUtil struct {
-	MapUtil utility.MapUtil
-	DBService db.DBService
-	FieldRepository repository.FieldRepository
-	ModuleRepository repository.ModuleRepository
+	MapUtil           utility.MapUtil
+	DBService         db.DBService
+	FieldRepository   repository.Repository
+	ModuleRepository  repository.ModuleRepository
 	SectionRepository repository.SectionRepository
 }
 
@@ -164,6 +164,7 @@ func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
 	methodName := "FetchFlowByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow id ", flowExternalId)
 	var flow model.Flow
+	f.FieldRepository = new(repository.FieldRepository)
 	flow = f.FieldRepository.FindByExternalId(flowExternalId)
 	return flow
 }
@@ -297,6 +298,7 @@ func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) 
 	fieldVersionsMap := make(map[int]model.FieldVersion)
 
 	var fieldVersions []model.FieldVersion
+	f.FieldRepository = new(repository.FieldRepository)
 	fieldVersions = f.FieldRepository.FetchFieldFromFieldVersion(completeFieldVersionNumberList)
 
 	for _, fv := range fieldVersions {
