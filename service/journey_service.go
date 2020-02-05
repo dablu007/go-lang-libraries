@@ -17,7 +17,7 @@ type JourneyService struct {
 func NewJourneyService(journeyService *JourneyServiceUtil, validator *utility.RequestValidator) *JourneyService {
 	service := &JourneyService{
 		JourneyServiceUtil: journeyService,
-		RequestValidator: validator,
+		RequestValidator:   validator,
 	}
 	return service
 }
@@ -44,7 +44,10 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 			TenantId:   tenantId,
 			ChannelId:  channelId}
 		flows := u.JourneyServiceUtil.FetchAllJourneysFromDB(flowContext)
-		journeyResponse := u.JourneyServiceUtil.GetParsedFlowsResponse(flows)
+		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList,
+			completeFieldVersionNumberList := u.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flows...)
+		journeyResponse := u.JourneyServiceUtil.ConstructJourneysResponse(flows, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap,
+			completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList)
 
 		//Do not set redis key when there is no entry for given flowContext.
 		if len(journeyResponse.JourneyResponses) == 0 {
@@ -88,9 +91,8 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", journeyExternalId)
 			return journeyResponseDto
 		}
-		moduleVersions, completeModuleVersionNumberList := f.JourneyServiceUtil.FetchModuleData(flow)
-		sectionVersions, moduleVersionsMap, completeSectionVersionNumberList := f.JourneyServiceUtil.FetchSectionsData(moduleVersions)
-		_, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.JourneyServiceUtil.FetchFieldData(sectionVersions)
+		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList,
+			completeFieldVersionNumberList := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flow)
 		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
 			moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap)
 

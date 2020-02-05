@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	service := "finbox-integration"
+	service := "flow"
 	environment := "dev"
 	config.Init(service, environment)
 	logger.InitLogger()
