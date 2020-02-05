@@ -7,6 +7,7 @@ import (
 	"flow/model"
 	"flow/model/response_dto"
 	"flow/utility"
+	"fmt"
 )
 
 type FlowService struct {
@@ -82,7 +83,12 @@ func (f FlowService) GetFlowById(flowExternalId string) response_dto.FlowRespons
 			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", flowExternalId)
 			return flowsResponse
 		}
-		flowsResponse, err := f.FlowServiceUtil.GetFlowModuleSectionAndFieldData(flow)
+		moduleVersions, completeModuleVersionNumberList := f.FlowServiceUtil.FetchModuleData(flow)
+		sectionVersions, moduleVersionsMap, completeSectionVersionNumberList := f.FlowServiceUtil.FetchSectionsData(moduleVersions)
+		fieldVersions,sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.FlowServiceUtil.FetchFieldData(sectionVersions)
+		fmt.Println("==== ", fieldVersions)
+		flowsResponse, err := f.FlowServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
+			moduleVersionsMap, completeSectionVersionNumberList,sectionVersionsMap,completeFieldVersionNumberList,fieldVersionsMap)
 		if err != nil{
 			logger.SugarLogger.Error(methodName, " couldn't update redis as failed to marshal response with err: ", err)
 			return flowsResponse

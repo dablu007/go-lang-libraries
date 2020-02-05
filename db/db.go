@@ -13,10 +13,13 @@ import (
 	"os"
 )
 
-var db *gorm.DB
-var err error
 
-func Init() {
+var err error
+var db *gorm.DB
+type DBService struct{
+
+}
+func (d DBService) Init() {
 	dbUserName := viper.GetString("database.username")
 	dbPassword := viper.GetString("database.password")
 	dbUrl := viper.GetString("database.url")
@@ -58,6 +61,6 @@ func Init() {
 	}
 }
 
-func GetDB() *gorm.DB {
+func (d DBService)GetDB() *gorm.DB {
 	return db
 }
