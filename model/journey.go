@@ -8,7 +8,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-type Flow struct {
+type Journey struct {
 	// gorm.Model
 	Id             int                    `gorm:"primary_key";"AUTO_INCREMENT";"column:id"`
 	ExternalId     uuid.UUID              `gorm:"column:external_id"`

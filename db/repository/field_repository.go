@@ -9,16 +9,16 @@ import (
 
 type Repository interface {
 	FetchFieldFromFieldVersion(completeFieldVersionNumberList map[int]bool) []model.FieldVersion
-	FindByExternalId(flowExternalId string) model.Flow
+	FindByExternalId(flowExternalId string) model.Journey
 }
 type FieldRepository struct {
-	MapUtil utility.MapUtil
+	MapUtil   utility.MapUtil
 	DBService db.DBService
 }
 
-func NewFieldRepository(DBService db.DBService) *FieldRepository{
+func NewFieldRepository(DBService db.DBService) *FieldRepository {
 	repo := &FieldRepository{
-		DBService:DBService,
+		DBService: DBService,
 	}
 	return repo
 }
@@ -35,8 +35,8 @@ func (f FieldRepository) FetchFieldFromFieldVersion(completeFieldVersionNumberLi
 	return fieldVersions
 }
 
-func (f FieldRepository) FindByExternalId(flowExternalId string) model.Flow {
-	var flow model.Flow
+func (f FieldRepository) FindByExternalId(flowExternalId string) model.Journey {
+	var flow model.Journey
 	dbConnection := f.DBService.GetDB()
 	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&flow)
 	return flow
