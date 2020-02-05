@@ -4,7 +4,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-type FlowResponseDto struct {
+type JourneyResponseDto struct {
 	Name       string                     `json:"name"`
 	ExternalId uuid.UUID                  `json:"external_id"`
 	Version    string                     `json:"version"`

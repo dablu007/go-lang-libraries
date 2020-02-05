@@ -35,6 +35,6 @@ func Test_FetchFlowByIdFromDB(t *testing.T) {
 	var flowService = &service.JourneyServiceUtil{
 		FieldRepository: fieldRepository,
 	}
-	var flowActual = flowService.FetchFlowByIdFromDB(externalId)
+	var flowActual = flowService.FetchJourneyByIdFromDB(externalId)
 	assert.Equal(t, flowActual.Id, flow.Id)
 }

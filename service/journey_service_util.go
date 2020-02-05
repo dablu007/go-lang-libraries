@@ -21,11 +21,11 @@ type JourneyServiceUtil struct {
 }
 
 func (f JourneyServiceUtil) FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey {
-	f.FlowRepository = new(repository.FlowRepositoryImpl)
-	return f.FlowRepository.FindActiveFlowsByFlowContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
+	f.FlowRepository = new(repository.JourneyRepositoryImpl)
+	return f.FlowRepository.FindActiveJourneysByJourneyContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
 }
 
-func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) response_dto.FlowResponsesDto {
+func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) response_dto.JourneyResponsesDto {
 	methodName := "GetParsedFlowsResponse"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow")
 
@@ -41,7 +41,7 @@ func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) respon
 	var fieldVersions []model.FieldVersion
 	fieldVersionsMap := make(map[int]model.FieldVersion)
 
-	var response response_dto.FlowResponsesDto
+	var response response_dto.JourneyResponsesDto
 	var versionNumbersList []int
 	for _, flow := range flows {
 		var versionNumbers []int
@@ -102,11 +102,11 @@ func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) respon
 	return response
 }
 
-func (f JourneyServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Journey {
-	methodName := "FetchFlowByIdFromDB:"
+func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.Journey {
+	methodName := "FetchJourneyByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey id ", flowExternalId)
 	var journey model.Journey
-	f.FlowRepository = new(repository.FlowRepositoryImpl)
+	f.FlowRepository = new(repository.JourneyRepositoryImpl)
 	journey = f.FlowRepository.FindByExternalId(flowExternalId)
 	return journey
 }
@@ -114,11 +114,11 @@ func (f JourneyServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Jou
 func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey model.Journey,
 	completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion,
 	completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion,
-	completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.FlowResponseDto {
+	completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto {
 	methodName := "ConstructFlowResponseWithModuleFieldSection"
 	logger.SugarLogger.Info(methodName, "fetching the response for journey data")
 
-	flowResponseDto := response_dto.FlowResponseDto{
+	flowResponseDto := response_dto.JourneyResponseDto{
 		Name:       journey.Name,
 		ExternalId: journey.ExternalId,
 		Version:    journey.Version,
@@ -216,10 +216,10 @@ func (f JourneyServiceUtil) ConstructResponse(journeys []model.Journey,
 	fieldVersionsMap map[int]model.FieldVersion,
 	completeModuleVersionNumberList map[int]bool,
 	completeSectionVersionNumberList map[int]bool,
-	completeFieldVersionNumberList map[int]bool) response_dto.FlowResponsesDto {
-	var response response_dto.FlowResponsesDto
+	completeFieldVersionNumberList map[int]bool) response_dto.JourneyResponsesDto {
+	var response response_dto.JourneyResponsesDto
 	for _, journey := range journeys {
-		response.FlowResponses = append(response.FlowResponses, f.ConstructFlowResponseWithModuleFieldSection(journey,
+		response.JourneyResponses = append(response.JourneyResponses, f.ConstructFlowResponseWithModuleFieldSection(journey,
 			completeModuleVersionNumberList, moduleVersionsMap,
 			completeSectionVersionNumberList, sectionVersionsMap,
 			completeFieldVersionNumberList, fieldVersionsMap))
