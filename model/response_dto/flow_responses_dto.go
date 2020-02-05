@@ -1,5 +1,5 @@
 package response_dto
 
-type FlowResponsesDto struct {
-	FlowResponses []FlowResponseDto `json:"flows"`
+type JourneyResponsesDto struct {
+	JourneyResponses []JourneyResponseDto `json:"flows"`
 }

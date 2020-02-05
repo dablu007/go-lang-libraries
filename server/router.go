@@ -35,9 +35,9 @@ func NewRouter() *gin.Engine {
 	{
 		group := v1.Group("/")
 		{
-			flowController := new(controller.FlowController)
-			group.GET("journeys", flowController.GetFlows())
-			group.GET("journeys/:journeyId", flowController.GetFlowById())
+			flowController := new(controller.JourneyController)
+			group.GET("journeys", flowController.GetJourneys())
+			group.GET("journeys/:journeyId", flowController.GetJourneyById())
 
 		}
 	}

@@ -8,35 +8,35 @@ import (
 )
 
 type FlowRepository interface {
-	FindByExternalId(flowExternalId string) model.Flow
-	FindActiveFlowsByFlowContext(merchantId string, tenantId string, channelId string) []model.Flow
+	FindByExternalId(flowExternalId string) model.Journey
+	FindActiveJourneysByJourneyContext(merchantId string, tenantId string, channelId string) []model.Journey
 }
 
-type FlowRepositoryImpl struct {
+type JourneyRepositoryImpl struct {
 	MapUtil   utility.MapUtil
 	DBService db.DBService
 }
 
-func NewFlowRepositoryImpl(DBService db.DBService) *FlowRepositoryImpl {
-	repo := &FlowRepositoryImpl{
+func NewFlowRepositoryImpl(DBService db.DBService) *JourneyRepositoryImpl {
+	repo := &JourneyRepositoryImpl{
 		DBService: DBService,
 	}
 	return repo
 }
 
-func (f FlowRepositoryImpl) FindByExternalId(flowExternalId string) model.Flow {
-	var flow model.Flow
+func (f JourneyRepositoryImpl) FindByExternalId(flowExternalId string) model.Journey {
+	var journey model.Journey
 	dbConnection := f.DBService.GetDB()
-	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&flow)
-	return flow
+	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&journey)
+	return journey
 }
 
-func (f FlowRepositoryImpl) FindActiveFlowsByFlowContext(merchantId string, tennatId string, channelId string) []model.Flow {
+func (f JourneyRepositoryImpl) FindActiveJourneysByJourneyContext(merchantId string, tennatId string, channelId string) []model.Journey {
 	dbConnection := f.DBService.GetDB()
-	var flows []model.Flow
+	var journeys []model.Journey
 	if dbConnection == nil {
-		return flows
+		return journeys
 	}
-	dbConnection.Where("flow_context->>'MerchantId' = ? and flow_context->>'TenantId' = ? and flow_context->>'ChannelId' = ? and status = ? and deleted_on is NULL", merchantId, tennatId, channelId, enum.Active).Find(&flows)
-	return flows
+	dbConnection.Where("flow_context->>'MerchantId' = ? and flow_context->>'TenantId' = ? and flow_context->>'ChannelId' = ? and status = ? and deleted_on is NULL", merchantId, tennatId, channelId, enum.Active).Find(&journeys)
+	return journeys
 }
