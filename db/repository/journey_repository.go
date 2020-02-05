@@ -7,7 +7,7 @@ import (
 	"flow/utility"
 )
 
-type FlowRepository interface {
+type JourneyRepository interface {
 	FindByExternalId(flowExternalId string) model.Journey
 	FindActiveJourneysByJourneyContext(merchantId string, tenantId string, channelId string) []model.Journey
 }

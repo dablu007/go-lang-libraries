@@ -12,17 +12,30 @@ import (
 )
 
 type JourneyServiceUtil struct {
-	MapUtil           utility.MapUtil
-	DBService         db.DBService
-	FlowRepository    repository.FlowRepository
+	MapUtil           *utility.MapUtil
+	DBService         *db.DBService
+	JourneyRepository repository.JourneyRepository
 	FieldRepository   repository.FieldRepository
 	ModuleRepository  repository.ModuleRepository
 	SectionRepository repository.SectionRepository
 }
 
+func NewJourneyServiceUtil(util *utility.MapUtil, dBService *db.DBService, journeyRepository *repository.JourneyRepositoryImpl,
+	fieldRepository *repository.FieldRepositoryImpl, moduleRepository *repository.ModuleRepositoryImpl,
+	sectionRepository *repository.SectionRepositoryImpl) *JourneyServiceUtil {
+	service := &JourneyServiceUtil{
+		MapUtil:           util,
+		DBService:         dBService,
+		JourneyRepository: journeyRepository,
+		FieldRepository:   fieldRepository,
+		ModuleRepository:  moduleRepository,
+		SectionRepository: sectionRepository,
+	}
+	return service
+}
+
 func (f JourneyServiceUtil) FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey {
-	f.FlowRepository = new(repository.JourneyRepositoryImpl)
-	return f.FlowRepository.FindActiveJourneysByJourneyContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
+	return f.JourneyRepository.FindActiveJourneysByJourneyContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
 }
 
 func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) response_dto.JourneyResponsesDto {
@@ -54,7 +67,7 @@ func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) respon
 			completeModuleVersionNumberList[num] = true
 		}
 	}
-	f.ModuleRepository = new(repository.ModuleRepositoryImpl)
+	//f.ModuleRepository = new(repository.ModuleRepositoryImpl)
 	moduleVersions = f.ModuleRepository.FetchModuleVersions(enum.Active, f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList))
 
 	var sectionNumberList []int
@@ -71,7 +84,7 @@ func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) respon
 		}
 	}
 
-	f.SectionRepository = new(repository.SectionRepositoryImpl)
+	//f.SectionRepository = new(repository.SectionRepositoryImpl)
 	sectionVersions = f.SectionRepository.FetchSectionVersions(enum.Active, f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList))
 
 	var fieldNumbersList []int
@@ -89,7 +102,7 @@ func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) respon
 		}
 	}
 
-	f.FieldRepository = new(repository.FieldRepositoryImpl)
+	//f.FieldRepository = new(repository.FieldRepositoryImpl)
 	fieldVersions = f.FieldRepository.FetchFieldVersions(enum.Active, f.MapUtil.GetKeyListFromKeyValueMap(completeFieldVersionNumberList))
 
 	for _, fv := range fieldVersions {
@@ -106,8 +119,7 @@ func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.
 	methodName := "FetchJourneyByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey id ", flowExternalId)
 	var journey model.Journey
-	f.FlowRepository = new(repository.JourneyRepositoryImpl)
-	journey = f.FlowRepository.FindByExternalId(flowExternalId)
+	journey = f.JourneyRepository.FindByExternalId(flowExternalId)
 	return journey
 }
 
@@ -201,7 +213,7 @@ func (f JourneyServiceUtil) FetchFieldData(sectionVersions []model.SectionVersio
 	fieldVersionsMap := make(map[int]model.FieldVersion)
 
 	var fieldVersions []model.FieldVersion
-	f.FieldRepository = new(repository.FieldRepositoryImpl)
+	//f.FieldRepository = new(repository.FieldRepositoryImpl)
 	fieldVersions = f.FieldRepository.FetchFieldFromFieldVersion(completeFieldVersionNumberList)
 
 	for _, fv := range fieldVersions {
