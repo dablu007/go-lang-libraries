@@ -20,9 +20,9 @@ type JourneyServiceUtil struct {
 	SectionRepository repository.SectionRepository
 }
 
-func NewJourneyServiceUtil(util *utility.MapUtil, dBService *db.DBService, journeyRepository *repository.JourneyRepositoryImpl,
-	fieldRepository *repository.FieldRepositoryImpl, moduleRepository *repository.ModuleRepositoryImpl,
-	sectionRepository *repository.SectionRepositoryImpl) *JourneyServiceUtil {
+func NewJourneyServiceUtil(util *utility.MapUtil, dBService *db.DBService, journeyRepository repository.JourneyRepository,
+	fieldRepository repository.FieldRepository, moduleRepository repository.ModuleRepository,
+	sectionRepository repository.SectionRepository) *JourneyServiceUtil {
 	service := &JourneyServiceUtil{
 		MapUtil:           util,
 		DBService:         dBService,

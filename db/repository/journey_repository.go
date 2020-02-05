@@ -17,6 +17,14 @@ type JourneyRepositoryImpl struct {
 	DBService db.DBService
 }
 
+func NewJourneyRepository() *JourneyRepositoryImpl {
+	repo := &JourneyRepositoryImpl{
+		MapUtil:utility.MapUtil{},
+		DBService:db.DBService{},
+	}
+	return repo
+}
+
 func NewFlowRepositoryImpl(DBService db.DBService) *JourneyRepositoryImpl {
 	repo := &JourneyRepositoryImpl{
 		DBService: DBService,

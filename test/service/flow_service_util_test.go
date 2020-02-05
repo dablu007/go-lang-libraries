@@ -5,12 +5,11 @@ import (
 	"flow/logger"
 	"flow/model"
 	"flow/service"
-	mock_repository . "flow/test/mocks"
+	mock_repository "flow/test/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
-	"time"
-	"reflect"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -20,7 +19,7 @@ func init() {
 	logger.InitLogger()
 }
 
-func Test_FetchFlowByIdFromDB(t *testing.T) {
+func TestFetchFlowByIdFromDB(t *testing.T) {
 	var controller = gomock.NewController(t)
 	defer controller.Finish()
 

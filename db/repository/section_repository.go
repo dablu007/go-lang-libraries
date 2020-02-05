@@ -18,9 +18,10 @@ type SectionRepositoryImpl struct {
 	DBService db.DBService
 }
 
-func NewSectionRepositoryImpl(DBService db.DBService) *SectionRepositoryImpl {
+func NewSectionRepository() *SectionRepositoryImpl {
 	repo := &SectionRepositoryImpl{
-		DBService: DBService,
+		MapUtil: utility.MapUtil{},
+		DBService: db.DBService{},
 	}
 	return repo
 }

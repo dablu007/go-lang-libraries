@@ -18,14 +18,15 @@ type FieldRepositoryImpl struct {
 	DBService db.DBService
 }
 
-func NewFieldRepositoryImpl(DBService db.DBService) *FieldRepositoryImpl {
+func NewFieldRepository() *FieldRepositoryImpl {
 	repo := &FieldRepositoryImpl{
-		DBService: DBService,
+		MapUtil:utility.MapUtil{},
+		DBService:db.DBService{},
 	}
 	return repo
 }
 
-func (f FieldRepositoryImpl) FetchFieldFromFieldVersion(completeFieldVersionNumberList map[int]bool) []model.FieldVersion {
+func (f *FieldRepositoryImpl) FetchFieldFromFieldVersion(completeFieldVersionNumberList map[int]bool) []model.FieldVersion {
 	methodName := "FetchFieldFromFieldVersion"
 	logger.SugarLogger.Info(methodName, " Fetching the field data with join on field versions")
 	var fieldVersions []model.FieldVersion
@@ -38,7 +39,7 @@ func (f FieldRepositoryImpl) FetchFieldFromFieldVersion(completeFieldVersionNumb
 	return fieldVersions
 }
 
-func (f FieldRepositoryImpl) FetchFieldVersions(fieldStatus enum.Status, fieldVersionNumbers []int) []model.FieldVersion {
+func (f *FieldRepositoryImpl) FetchFieldVersions(fieldStatus enum.Status, fieldVersionNumbers []int) []model.FieldVersion {
 	methodName := "FetchFieldVersions"
 	logger.SugarLogger.Info(methodName, " Fetching the field data with join on field versions with field status %s", fieldStatus.String())
 	var fieldVersions []model.FieldVersion
