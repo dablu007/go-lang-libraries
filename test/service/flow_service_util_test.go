@@ -32,7 +32,7 @@ func Test_FetchFlowByIdFromDB(t *testing.T) {
 	var externalId = "123"
 	fieldRepository.EXPECT().FindByExternalId(externalId).Return(flow)
 
-	var flowService = &service.FlowServiceUtil{
+	var flowService = &service.JourneyServiceUtil{
 		FieldRepository: fieldRepository,
 	}
 	var flowActual = flowService.FetchFlowByIdFromDB(externalId)

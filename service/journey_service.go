@@ -9,13 +9,13 @@ import (
 	"flow/utility"
 )
 
-type FlowService struct {
-	FlowServiceUtil  FlowServiceUtil
+type JourneyService struct {
+	FlowServiceUtil  JourneyServiceUtil
 	RequestValidator utility.RequestValidator
 }
 
-func (u FlowService) GetFlows(merchantId string, tenantId string, channelId string) response_dto.FlowResponsesDto {
-	methodName := "GetFlows"
+func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelId string) response_dto.FlowResponsesDto {
+	methodName := "GetJourneys"
 	logger.SugarLogger.Info(methodName, "Recieved request to get all the flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId)
 	redisClient := cache.GetRedisClient()
 	var flowsResponse response_dto.FlowResponsesDto
@@ -35,7 +35,7 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 			MerchantId: merchantId,
 			TenantId:   tenantId,
 			ChannelId:  channelId}
-		flows := u.FlowServiceUtil.FetchAllFlowsFromDB(flowContext)
+		flows := u.FlowServiceUtil.FetchAllJourneysFromDB(flowContext)
 		flowsResponse := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
 
 		//Do not set redis key when there is no entry for given flowContext.
@@ -59,8 +59,8 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 	return flowsResponse
 }
 
-func (f FlowService) GetFlowById(flowExternalId string) response_dto.FlowResponseDto {
-	methodName := "GetFlowById"
+func (f JourneyService) GetJourneyById(flowExternalId string) response_dto.FlowResponseDto {
+	methodName := "GetJourneyById"
 	logger.SugarLogger.Info(methodName, "Recieved request to get flow id ", flowExternalId)
 	redisClient := cache.GetRedisClient()
 	var flowsResponse response_dto.FlowResponseDto

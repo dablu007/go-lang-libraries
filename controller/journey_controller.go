@@ -4,12 +4,13 @@ import (
 	"flow/logger"
 	"flow/service"
 	"flow/utility"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type FlowController struct {
-	flowService      service.FlowService
+	journeyService   service.JourneyService
 	requestValidator utility.RequestValidator
 }
 
@@ -17,7 +18,7 @@ type FlowController struct {
 This method fetches and returns all the flows associated with given merchant.
 */
 func (u FlowController) GetFlows() gin.HandlerFunc {
-	methodName := "GetFlows:"
+	methodName := "GetJourneys:"
 	fn := func(c *gin.Context) {
 		merchantId := c.Query("merchantId")
 		tenantId := c.Query("tenantId")
@@ -25,7 +26,7 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 		logger.SugarLogger.Info(methodName, "Recieved request to get all the flows associated with merchant: ", merchantId)
 		if u.requestValidator.IsValidRequest(merchantId, tenantId, channelId) {
 			logger.SugarLogger.Info(methodName, "Request is validated")
-			flows := u.flowService.GetFlows(merchantId, tenantId, channelId)
+			flows := u.journeyService.GetJourneys(merchantId, tenantId, channelId)
 			if len(flows.FlowResponses) > 0 {
 				c.JSON(http.StatusOK, flows)
 				return
@@ -40,17 +41,17 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 	return fn
 }
 
-func (u FlowController) GetFlowById() gin.HandlerFunc  {
-	methodName := "GetFlowById:"
+func (u FlowController) GetFlowById() gin.HandlerFunc {
+	methodName := "GetJourneyById:"
 	fn := func(c *gin.Context) {
 		flowId := c.Param("journeyId")
 		logger.SugarLogger.Info(methodName, "Recieved request to get flow by flowId ", flowId)
 		if len(flowId) <= 0 {
-			logger.SugarLogger.Info(methodName, " Flow id passed is empty or null ", flowId)
+			logger.SugarLogger.Info(methodName, " journey id passed is empty or null ", flowId)
 			c.JSON(http.StatusBadRequest, gin.H{})
 			return
 		}
-		flow := u.flowService.GetFlowById(flowId)
+		flow := u.journeyService.GetJourneyById(flowId)
 		if len(flow.Name) > 0 {
 			c.JSON(http.StatusOK, flow)
 			return

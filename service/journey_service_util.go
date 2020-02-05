@@ -11,7 +11,7 @@ import (
 	"flow/utility"
 )
 
-type FlowServiceUtil struct {
+type JourneyServiceUtil struct {
 	MapUtil           utility.MapUtil
 	DBService         db.DBService
 	FlowRepository    repository.FlowRepository
@@ -20,12 +20,12 @@ type FlowServiceUtil struct {
 	SectionRepository repository.SectionRepository
 }
 
-func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
+func (f JourneyServiceUtil) FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey {
 	f.FlowRepository = new(repository.FlowRepositoryImpl)
 	return f.FlowRepository.FindActiveFlowsByFlowContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
 }
 
-func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) response_dto.FlowResponsesDto {
+func (f JourneyServiceUtil) GetParsedFlowsResponse(flows []model.Journey) response_dto.FlowResponsesDto {
 	methodName := "GetParsedFlowsResponse"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow")
 
@@ -102,29 +102,29 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) response_dto
 	return response
 }
 
-func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
+func (f JourneyServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Journey {
 	methodName := "FetchFlowByIdFromDB:"
-	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow id ", flowExternalId)
-	var flow model.Flow
+	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey id ", flowExternalId)
+	var journey model.Journey
 	f.FlowRepository = new(repository.FlowRepositoryImpl)
-	flow = f.FlowRepository.FindByExternalId(flowExternalId)
-	return flow
+	journey = f.FlowRepository.FindByExternalId(flowExternalId)
+	return journey
 }
 
-func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.Flow,
+func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey model.Journey,
 	completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion,
 	completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion,
 	completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.FlowResponseDto {
 	methodName := "ConstructFlowResponseWithModuleFieldSection"
-	logger.SugarLogger.Info(methodName, "fetching the response for flow data")
+	logger.SugarLogger.Info(methodName, "fetching the response for journey data")
 
 	flowResponseDto := response_dto.FlowResponseDto{
-		Name:       flow.Name,
-		ExternalId: flow.ExternalId,
-		Version:    flow.Version,
-		Type:       flow.Type.String()}
+		Name:       journey.Name,
+		ExternalId: journey.ExternalId,
+		Version:    journey.Version,
+		Type:       journey.Type.String()}
 	var moduleVersionNumberList []int
-	json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionNumberList)
+	json.Unmarshal([]byte(journey.ModuleVersions), &moduleVersionNumberList)
 	for _, mvn := range moduleVersionNumberList {
 		if completeModuleVersionNumberList[mvn] == true {
 			moduleVersion := moduleVersionsMap[mvn]
@@ -136,11 +136,11 @@ func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.
 		}
 	}
 
-	logger.SugarLogger.Info(methodName, "Returning the response for flow data => ", flowResponseDto)
+	logger.SugarLogger.Info(methodName, "Returning the response for journey data => ", flowResponseDto)
 	return flowResponseDto
 }
 
-func (f FlowServiceUtil) FetchModuleData(flow model.Flow) ([]model.ModuleVersion, map[int]bool) {
+func (f JourneyServiceUtil) FetchModuleData(flow model.Journey) ([]model.ModuleVersion, map[int]bool) {
 	methodName := "FetchModuleData"
 	var moduleVersionList []int
 	completeModuleVersionNumberList := make(map[int]bool)
@@ -157,7 +157,7 @@ func (f FlowServiceUtil) FetchModuleData(flow model.Flow) ([]model.ModuleVersion
 	return moduleVersions, completeModuleVersionNumberList
 }
 
-func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion) ([]model.SectionVersion, map[int]model.ModuleVersion, map[int]bool) {
+func (f JourneyServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion) ([]model.SectionVersion, map[int]model.ModuleVersion, map[int]bool) {
 	methodName := "FetchSectionsData"
 	var sectionNumberList []int
 	moduleVersionsMap := make(map[int]model.ModuleVersion)
@@ -180,7 +180,7 @@ func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion)
 	return sectionVersions, moduleVersionsMap, completeSectionVersionNumberList
 }
 
-func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) ([]model.FieldVersion, map[int]model.SectionVersion, map[int]bool, map[int]model.FieldVersion) {
+func (f JourneyServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) ([]model.FieldVersion, map[int]model.SectionVersion, map[int]bool, map[int]model.FieldVersion) {
 	methodName := "FetchFieldData"
 	sectionVersionsMap := make(map[int]model.SectionVersion)
 	var fieldNumbersList []int
@@ -210,7 +210,7 @@ func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) 
 	return fieldVersions, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap
 }
 
-func (f FlowServiceUtil) ConstructResponse(flows []model.Flow,
+func (f JourneyServiceUtil) ConstructResponse(journeys []model.Journey,
 	moduleVersionsMap map[int]model.ModuleVersion,
 	sectionVersionsMap map[int]model.SectionVersion,
 	fieldVersionsMap map[int]model.FieldVersion,
@@ -218,8 +218,8 @@ func (f FlowServiceUtil) ConstructResponse(flows []model.Flow,
 	completeSectionVersionNumberList map[int]bool,
 	completeFieldVersionNumberList map[int]bool) response_dto.FlowResponsesDto {
 	var response response_dto.FlowResponsesDto
-	for _, flow := range flows {
-		response.FlowResponses = append(response.FlowResponses, f.ConstructFlowResponseWithModuleFieldSection(flow,
+	for _, journey := range journeys {
+		response.FlowResponses = append(response.FlowResponses, f.ConstructFlowResponseWithModuleFieldSection(journey,
 			completeModuleVersionNumberList, moduleVersionsMap,
 			completeSectionVersionNumberList, sectionVersionsMap,
 			completeFieldVersionNumberList, fieldVersionsMap))
@@ -227,7 +227,7 @@ func (f FlowServiceUtil) ConstructResponse(flows []model.Flow,
 	return response
 }
 
-func (f FlowServiceUtil) GetFieldVersionResponseDto(fieldVersion model.FieldVersion) response_dto.FieldVersionsResponseDto {
+func (f JourneyServiceUtil) GetFieldVersionResponseDto(fieldVersion model.FieldVersion) response_dto.FieldVersionsResponseDto {
 	fieldVersionResponseDto := response_dto.FieldVersionsResponseDto{
 		Name:       fieldVersion.Name,
 		ExternalId: fieldVersion.ExternalId,
@@ -237,7 +237,7 @@ func (f FlowServiceUtil) GetFieldVersionResponseDto(fieldVersion model.FieldVers
 	return fieldVersionResponseDto
 }
 
-func (f FlowServiceUtil) GetSectionVersionResponseDto(sectionVersion model.SectionVersion, completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.SectionVersionsResponseDto {
+func (f JourneyServiceUtil) GetSectionVersionResponseDto(sectionVersion model.SectionVersion, completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.SectionVersionsResponseDto {
 	sectionVersionResponseDto := response_dto.SectionVersionsResponseDto{
 		Name:       sectionVersion.Name,
 		ExternalId: sectionVersion.ExternalId,
@@ -258,7 +258,7 @@ func (f FlowServiceUtil) GetSectionVersionResponseDto(sectionVersion model.Secti
 	return sectionVersionResponseDto
 }
 
-func (f FlowServiceUtil) getModuleVersionResponseDto(moduleVersion model.ModuleVersion, completeSectionVersionNumberList map[int]bool,
+func (f JourneyServiceUtil) getModuleVersionResponseDto(moduleVersion model.ModuleVersion, completeSectionVersionNumberList map[int]bool,
 	sectionVersionsMap map[int]model.SectionVersion, completeFieldVersionNumberList map[int]bool,
 	fieldVersionsMap map[int]model.FieldVersion) response_dto.ModuleVersionResponseDto {
 	moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{
