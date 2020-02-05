@@ -13,7 +13,7 @@ import (
 var config *viper.Viper
 
 func Init(service, env string) {
-	url := ("http://configuration.zestmoney.in:8888/" + service + "/" + env)
+	url := ("http://configurations.zestmoney.in:8888/" + service + "/" + env)
 	fmt.Println("%s", url)
 	fmt.Println("Loading config from %s\n", url)
 	body, err := fetchConfiguration(url)
