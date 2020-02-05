@@ -17,18 +17,19 @@ func main() {
 	service := "flow"
 	environment := os.Getenv("BOOT_CUR_ENV")
 	if environment == "" {
-		environment = "dev"
+		environment = "staging"
 	}
 	flag.Usage = func() {
 		fmt.Println("Usage: server -s {service_name} -e {environment}")
 		os.Exit(1)
 	}
 	flag.Parse()
-
+	var db db.DBService
 	config.Init(service, environment)
 	logger.InitLogger()
 	auth.Init()
 	flag.Parse()
+
 	db.Init()
 	cache.Init()
 	server.Init()

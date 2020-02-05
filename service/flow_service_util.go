@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"flow/db"
+	"flow/db/repository"
 	"flow/enum"
 	"flow/logger"
 	"flow/model"
@@ -11,14 +12,18 @@ import (
 )
 
 type FlowServiceUtil struct {
-	MapUtil utility.MapUtil
+	MapUtil           utility.MapUtil
+	DBService         db.DBService
+	FieldRepository   repository.Repository
+	ModuleRepository  repository.ModuleRepository
+	SectionRepository repository.SectionRepository
 }
 
-func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
+func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Journey {
 	methodName := "FetchAllFlowsFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow context ", flowContext)
-	dbConnection := db.GetDB()
-	var flows []model.Flow
+	dbConnection := f.DBService.GetDB()
+	var flows []model.Journey
 	if dbConnection == nil {
 		return flows
 	}
@@ -26,10 +31,10 @@ func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []mo
 	return flows
 }
 
-func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
+func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Journey) (response_dto.FlowResponsesDto, error) {
 	methodName := "GetParsedFlowsResponse"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow")
-	dbConnection := db.GetDB()
+	dbConnection := f.DBService.GetDB()
 	completeModuleVersionNumberList := make(map[int]bool)
 	var moduleVersions []model.ModuleVersion
 	moduleVersionsMap := make(map[int]model.ModuleVersion)
@@ -155,80 +160,22 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 	return response, nil
 }
 
-func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
+func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Journey {
 	methodName := "FetchFlowByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow id ", flowExternalId)
-	dbConnection := db.GetDB()
-	var flow model.Flow
-	if dbConnection == nil {
-		return flow
-	}
-	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&flow)
+	var flow model.Journey
+	f.FieldRepository = new(repository.FieldRepository)
+	flow = f.FieldRepository.FindByExternalId(flowExternalId)
 	return flow
 }
 
-func (f FlowServiceUtil) GetFlowModuleSectionAndFieldData(flow model.Flow) (response_dto.FlowResponseDto, error) {
-	methodName := "GetFlowModuleSectionAndFieldData"
+func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.Journey,
+	completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion,
+	completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion,
+	completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) (response_dto.FlowResponseDto, error) {
+	methodName := "ConstructFlowResponseWithModuleFieldSection"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow data")
-	dbConnection := db.GetDB()
-	completeModuleVersionNumberList := make(map[int]bool)
-	var moduleVersions []model.ModuleVersion
-	moduleVersionsMap := make(map[int]model.ModuleVersion)
 
-	completeSectionVersionNumberList := make(map[int]bool)
-	var sectionVersions []model.SectionVersion
-	sectionVersionsMap := make(map[int]model.SectionVersion)
-	completeFieldVersionNumberList := make(map[int]bool)
-	var fieldVersions []model.FieldVersion
-	fieldVersionsMap := make(map[int]model.FieldVersion)
-
-	var moduleVersionList []int
-	json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionList)
-
-	logger.SugarLogger.Info(methodName, "list of modules ", moduleVersionList)
-	for _, num := range moduleVersionList {
-		if completeModuleVersionNumberList[num] == false {
-			completeModuleVersionNumberList[num] = true
-		}
-	}
-	dbConnection.Joins("JOIN module ON module.id = module_version.module_id ").Where("module_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeModuleVersionNumberList)).Find(&moduleVersions)
-
-	var sectionNumberList []int
-	for _, mv := range moduleVersions {
-		moduleVersionsMap[mv.Id] = mv
-		var sectionNumbers []int
-		json.Unmarshal([]byte(mv.SectionVersions), &sectionNumbers)
-		sectionNumberList = append(sectionNumberList, sectionNumbers...)
-	}
-	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
-	for _, num := range sectionNumberList {
-		if completeSectionVersionNumberList[num] == false {
-			completeSectionVersionNumberList[num] = true
-		}
-	}
-
-	dbConnection.Joins("JOIN section ON section.id = section_version.section_id").Where("section_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeSectionVersionNumberList)).Find(&sectionVersions)
-
-	var fieldNumbersList []int
-	for _, sv := range sectionVersions {
-		sectionVersionsMap[sv.Id] = sv
-		var fieldNumbers []int
-		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
-		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
-	}
-
-	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
-	for _, num := range fieldNumbersList {
-		if completeFieldVersionNumberList[num] == false {
-			completeFieldVersionNumberList[num] = true
-		}
-	}
-
-	dbConnection.Joins("JOIN field ON field.id = field_version.field_id ").Where("field_version.id in (?) ", f.MapUtil.GetKeyListFromKeyValueMap(completeFieldVersionNumberList)).Find(&fieldVersions)
-
-	for _, fv := range fieldVersions {
-		fieldVersionsMap[fv.Id] = fv
-	}
 	flowResponseDto := response_dto.FlowResponseDto{
 		Name:       flow.Name,
 		ExternalId: flow.ExternalId,
@@ -287,4 +234,74 @@ func (f FlowServiceUtil) GetFlowModuleSectionAndFieldData(flow model.Flow) (resp
 
 	logger.SugarLogger.Info(methodName, "Returning the response for flow data => ", flowResponseDto)
 	return flowResponseDto, nil
+}
+
+func (f FlowServiceUtil) FetchModuleData(flow model.Journey) ([]model.ModuleVersion, map[int]bool) {
+	methodName := "FetchModuleData"
+	var moduleVersionList []int
+	completeModuleVersionNumberList := make(map[int]bool)
+	var moduleVersions []model.ModuleVersion
+	json.Unmarshal([]byte(flow.ModuleVersions), &moduleVersionList)
+
+	logger.SugarLogger.Info(methodName, "list of modules ", moduleVersionList)
+	for _, num := range moduleVersionList {
+		if completeModuleVersionNumberList[num] == false {
+			completeModuleVersionNumberList[num] = true
+		}
+	}
+	moduleVersions = f.ModuleRepository.FetchModuleFromModuleVersion(completeModuleVersionNumberList)
+	return moduleVersions, completeModuleVersionNumberList
+}
+
+func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion) ([]model.SectionVersion, map[int]model.ModuleVersion, map[int]bool) {
+	methodName := "FetchSectionsData"
+	var sectionNumberList []int
+	moduleVersionsMap := make(map[int]model.ModuleVersion)
+	completeSectionVersionNumberList := make(map[int]bool)
+	var sectionVersions []model.SectionVersion
+	for _, mv := range moduleVersions {
+		moduleVersionsMap[mv.Id] = mv
+		var sectionNumbers []int
+		json.Unmarshal([]byte(mv.SectionVersions), &sectionNumbers)
+		sectionNumberList = append(sectionNumberList, sectionNumbers...)
+	}
+	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
+	for _, num := range sectionNumberList {
+		if completeSectionVersionNumberList[num] == false {
+			completeSectionVersionNumberList[num] = true
+		}
+	}
+
+	sectionVersions = f.SectionRepository.FetchSectionFromSectionVersions(completeSectionVersionNumberList)
+	return sectionVersions, moduleVersionsMap, completeSectionVersionNumberList
+}
+
+func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) ([]model.FieldVersion, map[int]model.SectionVersion, map[int]bool, map[int]model.FieldVersion) {
+	methodName := "FetchFieldData"
+	sectionVersionsMap := make(map[int]model.SectionVersion)
+	var fieldNumbersList []int
+	completeFieldVersionNumberList := make(map[int]bool)
+	for _, sv := range sectionVersions {
+		sectionVersionsMap[sv.Id] = sv
+		var fieldNumbers []int
+		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
+		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
+	}
+
+	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
+	for _, num := range fieldNumbersList {
+		if completeFieldVersionNumberList[num] == false {
+			completeFieldVersionNumberList[num] = true
+		}
+	}
+	fieldVersionsMap := make(map[int]model.FieldVersion)
+
+	var fieldVersions []model.FieldVersion
+	f.FieldRepository = new(repository.FieldRepository)
+	fieldVersions = f.FieldRepository.FetchFieldFromFieldVersion(completeFieldVersionNumberList)
+
+	for _, fv := range fieldVersions {
+		fieldVersionsMap[fv.Id] = fv
+	}
+	return fieldVersions, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap
 }

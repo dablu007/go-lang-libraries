@@ -4,11 +4,12 @@ import (
 	"flow/auth"
 	"flow/controller"
 	"fmt"
+	"os"
+
 	"github.com/gin-gonic/gin"
-	"github.com/newrelic/go-agent"
+	newrelic "github.com/newrelic/go-agent"
 	"github.com/newrelic/go-agent/_integrations/nrgin/v1"
 	"github.com/spf13/viper"
-	"os"
 )
 
 func NewRouter() *gin.Engine {
@@ -26,17 +27,17 @@ func NewRouter() *gin.Engine {
 		os.Exit(1)
 	}
 	router.Use(nrgin.Middleware(app))
-	router.GET("rest/flows/health", health.Status)
+	router.GET("journey-definition/health", health.Status)
 	router.Use(auth.AuthMiddleware())
-	router.GET("rest/flows/refresh", cacheController.DeleteCacheEntry())
+	router.GET("journey-definition/refresh", cacheController.DeleteCacheEntry())
 
-	v1 := router.Group("rest/v1")
+	v1 := router.Group("journey-definition/v1")
 	{
 		group := v1.Group("/")
 		{
 			flowController := new(controller.FlowController)
-			group.GET("flows", flowController.GetFlows())
-			group.GET("flows/:flowId", flowController.GetFlowById())
+			group.GET("journeys", flowController.GetFlows())
+			group.GET("journeys/:journeyId", flowController.GetFlowById())
 
 		}
 	}
