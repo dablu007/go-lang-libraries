@@ -7,11 +7,10 @@ import (
 	"flow/model"
 	"flow/model/response_dto"
 	"flow/utility"
-	"fmt"
 )
 
 type FlowService struct {
-	FlowServiceUtil FlowServiceUtil
+	FlowServiceUtil  FlowServiceUtil
 	RequestValidator utility.RequestValidator
 }
 
@@ -37,25 +36,22 @@ func (u FlowService) GetFlows(merchantId string, tenantId string, channelId stri
 			TenantId:   tenantId,
 			ChannelId:  channelId}
 		flows := u.FlowServiceUtil.FetchAllFlowsFromDB(flowContext)
-		flowsResponse, err := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
-		if err != nil {
-			logger.SugarLogger.Error(methodName, "Failed to fetch parsed flows associated with merchant: ", merchantId, " tenantId: ", tenantId, " channelId: ", channelId, " with error: ", err)
-			return flowsResponse
-		}
+		flowsResponse := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
+
 		//Do not set redis key when there is no entry for given flowContext.
 		if len(flowsResponse.FlowResponses) == 0 {
 			return flowsResponse
 		}
 
 		response, err := json.Marshal(flowsResponse)
-		if err != nil{
+		if err != nil {
 			logger.SugarLogger.Error(methodName, " couldn't update redis as failed to marshal response with err: ", err)
 			return flowsResponse
 		}
 
-		logger.SugarLogger.Info(methodName, " Adding redis key: ",redisKey)
+		logger.SugarLogger.Info(methodName, " Adding redis key: ", redisKey)
 		setStatus := redisClient.Set(redisKey, response, 0)
-		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ",redisKey)
+		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", redisKey)
 		return flowsResponse
 	}
 	logger.SugarLogger.Info(methodName, " UnMarshlling the cached flow response")
@@ -85,16 +81,12 @@ func (f FlowService) GetFlowById(flowExternalId string) response_dto.FlowRespons
 		}
 		moduleVersions, completeModuleVersionNumberList := f.FlowServiceUtil.FetchModuleData(flow)
 		sectionVersions, moduleVersionsMap, completeSectionVersionNumberList := f.FlowServiceUtil.FetchSectionsData(moduleVersions)
-		fieldVersions,sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.FlowServiceUtil.FetchFieldData(sectionVersions)
-		fmt.Println("==== ", fieldVersions)
-		flowsResponse, err := f.FlowServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
-			moduleVersionsMap, completeSectionVersionNumberList,sectionVersionsMap,completeFieldVersionNumberList,fieldVersionsMap)
-		if err != nil{
-			logger.SugarLogger.Error(methodName, " couldn't update redis as failed to marshal response with err: ", err)
-			return flowsResponse
-		}
+		_, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.FlowServiceUtil.FetchFieldData(sectionVersions)
+		flowsResponse := f.FlowServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
+			moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap)
+
 		response, err := json.Marshal(flowsResponse)
-		if err != nil{
+		if err != nil {
 			logger.SugarLogger.Error(methodName, " failed to marshal response with err: will not be able to update redis", err)
 			return flowsResponse
 		}

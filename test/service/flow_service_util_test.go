@@ -5,21 +5,21 @@ import (
 	"flow/logger"
 	"flow/model"
 	"flow/service"
-	mock_repository "flow/test/mocks"
+	mock_repository . "flow/test/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
 	"testing"
 	"time"
 )
 
-func init(){
+func init() {
 	service := "finbox-integration"
 	environment := "dev"
 	config.Init(service, environment)
 	logger.InitLogger()
 }
 
-func TestFetchFlowByIdFromDB(t *testing.T) {
+func Test_FetchFlowByIdFromDB(t *testing.T) {
 	var controller = gomock.NewController(t)
 	defer controller.Finish()
 
@@ -32,7 +32,7 @@ func TestFetchFlowByIdFromDB(t *testing.T) {
 	fieldRepository.EXPECT().FindByExternalId(externalId).Return(flow)
 
 	var flowService = &service.FlowServiceUtil{
-		FieldRepository:   fieldRepository,
+		FieldRepository: fieldRepository,
 	}
 	var flowActual = flowService.FetchFlowByIdFromDB(externalId)
 	assert.Equal(t, flowActual.Id, flow.Id)

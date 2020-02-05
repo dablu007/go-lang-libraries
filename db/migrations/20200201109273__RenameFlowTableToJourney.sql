@@ -1,0 +1,1 @@
+alter table flow rename to journey;

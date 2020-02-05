@@ -43,7 +43,7 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 func (u FlowController) GetFlowById() gin.HandlerFunc  {
 	methodName := "GetFlowById:"
 	fn := func(c *gin.Context) {
-		flowId := c.Param("flowId")
+		flowId := c.Param("journeyId")
 		logger.SugarLogger.Info(methodName, "Recieved request to get flow by flowId ", flowId)
 		if len(flowId) <= 0 {
 			logger.SugarLogger.Info(methodName, " Flow id passed is empty or null ", flowId)
