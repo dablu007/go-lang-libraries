@@ -36,4 +36,13 @@ func TestFetchFlowByIdFromDB(t *testing.T) {
 	}
 	var flowActual = journeyService.FetchJourneyByIdFromDB(externalId)
 	assert.Equal(t, flowActual.Id, flow.Id)
+
+
+	journeyRepository.EXPECT().FindByExternalId("").Return(model.Journey{})
+
+	journeyService = &service.JourneyServiceUtil{
+		JourneyRepository: journeyRepository,
+	}
+	flowActual = journeyService.FetchJourneyByIdFromDB("")
+	assert.Equal(t, len(flowActual.Name), 0)
 }
