@@ -7,7 +7,7 @@ import (
 	"flow/utility"
 )
 
-type FlowRepository interface {
+type JourneyRepository interface {
 	FindByExternalId(flowExternalId string) model.Journey
 	FindActiveJourneysByJourneyContext(merchantId string, tenantId string, channelId string) []model.Journey
 }
@@ -15,6 +15,14 @@ type FlowRepository interface {
 type JourneyRepositoryImpl struct {
 	MapUtil   utility.MapUtil
 	DBService db.DBService
+}
+
+func NewJourneyRepository() *JourneyRepositoryImpl {
+	repo := &JourneyRepositoryImpl{
+		MapUtil:utility.MapUtil{},
+		DBService:db.DBService{},
+	}
+	return repo
 }
 
 func NewFlowRepositoryImpl(DBService db.DBService) *JourneyRepositoryImpl {

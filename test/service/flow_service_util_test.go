@@ -5,12 +5,11 @@ import (
 	"flow/logger"
 	"flow/model"
 	"flow/service"
-	mock_repository . "flow/test/mocks"
+	mock_repository "flow/test/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/magiconair/properties/assert"
-	"time"
-	"reflect"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -20,21 +19,30 @@ func init() {
 	logger.InitLogger()
 }
 
-func Test_FetchFlowByIdFromDB(t *testing.T) {
+func TestFetchFlowByIdFromDB(t *testing.T) {
 	var controller = gomock.NewController(t)
 	defer controller.Finish()
 
-	var flow model.Flow
+	var flow model.Journey
 	flow.Id = 1
 	flow.CreatedOn = time.Now()
 
-	var fieldRepository = mock_repository.NewMockRepository(controller)
+	var journeyRepository = mock_repository.NewMockJourneyRepository(controller)
 	var externalId = "123"
-	fieldRepository.EXPECT().FindByExternalId(externalId).Return(flow)
+	journeyRepository.EXPECT().FindByExternalId(externalId).Return(flow)
 
-	var flowService = &service.JourneyServiceUtil{
-		FieldRepository: fieldRepository,
+	var journeyService = &service.JourneyServiceUtil{
+		JourneyRepository: journeyRepository,
 	}
-	var flowActual = flowService.FetchJourneyByIdFromDB(externalId)
+	var flowActual = journeyService.FetchJourneyByIdFromDB(externalId)
 	assert.Equal(t, flowActual.Id, flow.Id)
+
+
+	journeyRepository.EXPECT().FindByExternalId("").Return(model.Journey{})
+
+	journeyService = &service.JourneyServiceUtil{
+		JourneyRepository: journeyRepository,
+	}
+	flowActual = journeyService.FetchJourneyByIdFromDB("")
+	assert.Equal(t, len(flowActual.Name), 0)
 }

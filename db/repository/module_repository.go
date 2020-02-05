@@ -18,9 +18,10 @@ type ModuleRepositoryImpl struct {
 	DBService db.DBService
 }
 
-func NewModuleRepositoryImpl(DBService db.DBService) *ModuleRepositoryImpl {
+func NewModuleRepository() *ModuleRepositoryImpl {
 	repo := &ModuleRepositoryImpl{
-		DBService: DBService,
+		MapUtil:utility.MapUtil{},
+		DBService: db.DBService{},
 	}
 	return repo
 }

@@ -10,13 +10,21 @@ import (
 )
 
 type JourneyController struct {
-	journeyService   service.JourneyService
-	requestValidator utility.RequestValidator
+	journeyService   *service.JourneyService
+	requestValidator *utility.RequestValidator
 }
 
 /*
 This method fetches and returns all the flows associated with given merchant.
 */
+
+func NewJourneyController(journeyService *service.JourneyService, validator *utility.RequestValidator) *JourneyController {
+	controller := &JourneyController{
+		journeyService:   journeyService,
+		requestValidator: validator,
+	}
+	return controller
+}
 func (u JourneyController) GetJourneys() gin.HandlerFunc {
 	methodName := "GetJourneys:"
 	fn := func(c *gin.Context) {

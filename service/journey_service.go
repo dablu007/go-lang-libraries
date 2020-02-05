@@ -10,8 +10,16 @@ import (
 )
 
 type JourneyService struct {
-	FlowServiceUtil  JourneyServiceUtil
-	RequestValidator utility.RequestValidator
+	JourneyServiceUtil *JourneyServiceUtil
+	RequestValidator   *utility.RequestValidator
+}
+
+func NewJourneyService(journeyService *JourneyServiceUtil, validator *utility.RequestValidator) *JourneyService {
+	service := &JourneyService{
+		JourneyServiceUtil: journeyService,
+		RequestValidator: validator,
+	}
+	return service
 }
 
 func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelId string) response_dto.JourneyResponsesDto {
@@ -35,8 +43,8 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 			MerchantId: merchantId,
 			TenantId:   tenantId,
 			ChannelId:  channelId}
-		flows := u.FlowServiceUtil.FetchAllJourneysFromDB(flowContext)
-		journeyResponse := u.FlowServiceUtil.GetParsedFlowsResponse(flows)
+		flows := u.JourneyServiceUtil.FetchAllJourneysFromDB(flowContext)
+		journeyResponse := u.JourneyServiceUtil.GetParsedFlowsResponse(flows)
 
 		//Do not set redis key when there is no entry for given flowContext.
 		if len(journeyResponse.JourneyResponses) == 0 {
@@ -69,20 +77,21 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 		return journeyResponseDto
 	}
 	logger.SugarLogger.Info("Fetching the flow data from redis for journeyExternalId ", journeyExternalId)
+	redisClient.FlushAll()
 	cachedFlow, err := redisClient.Get(journeyExternalId).Result()
 	if err != nil {
 		logger.SugarLogger.Info(methodName, "Failed to fetch flow from redis cache for journeyExternalId: ", journeyExternalId, " with error: ", err)
 	}
 	if len(cachedFlow) == 0 {
-		flow := f.FlowServiceUtil.FetchJourneyByIdFromDB(journeyExternalId)
+		flow := f.JourneyServiceUtil.FetchJourneyByIdFromDB(journeyExternalId)
 		if len(flow.Name) <= 0 {
 			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", journeyExternalId)
 			return journeyResponseDto
 		}
-		moduleVersions, completeModuleVersionNumberList := f.FlowServiceUtil.FetchModuleData(flow)
-		sectionVersions, moduleVersionsMap, completeSectionVersionNumberList := f.FlowServiceUtil.FetchSectionsData(moduleVersions)
-		_, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.FlowServiceUtil.FetchFieldData(sectionVersions)
-		flowsResponse := f.FlowServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
+		moduleVersions, completeModuleVersionNumberList := f.JourneyServiceUtil.FetchModuleData(flow)
+		sectionVersions, moduleVersionsMap, completeSectionVersionNumberList := f.JourneyServiceUtil.FetchSectionsData(moduleVersions)
+		_, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap := f.JourneyServiceUtil.FetchFieldData(sectionVersions)
+		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
 			moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap)
 
 		response, err := json.Marshal(flowsResponse)
