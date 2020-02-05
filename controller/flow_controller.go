@@ -4,8 +4,9 @@ import (
 	"flow/logger"
 	"flow/service"
 	"flow/utility"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type FlowController struct {
@@ -40,13 +41,13 @@ func (u FlowController) GetFlows() gin.HandlerFunc {
 	return fn
 }
 
-func (u FlowController) GetFlowById() gin.HandlerFunc  {
+func (u FlowController) GetFlowById() gin.HandlerFunc {
 	methodName := "GetFlowById:"
 	fn := func(c *gin.Context) {
-		flowId := c.Param("flowId")
+		flowId := c.Param("journeyId")
 		logger.SugarLogger.Info(methodName, "Recieved request to get flow by flowId ", flowId)
 		if len(flowId) <= 0 {
-			logger.SugarLogger.Info(methodName, " Flow id passed is empty or null ", flowId)
+			logger.SugarLogger.Info(methodName, " journey id passed is empty or null ", flowId)
 			c.JSON(http.StatusBadRequest, gin.H{})
 			return
 		}

@@ -19,11 +19,11 @@ type FlowServiceUtil struct {
 	SectionRepository repository.SectionRepository
 }
 
-func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Flow {
+func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []model.Journey {
 	methodName := "FetchAllFlowsFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow context ", flowContext)
 	dbConnection := f.DBService.GetDB()
-	var flows []model.Flow
+	var flows []model.Journey
 	if dbConnection == nil {
 		return flows
 	}
@@ -31,7 +31,7 @@ func (f FlowServiceUtil) FetchAllFlowsFromDB(flowContext model.FlowContext) []mo
 	return flows
 }
 
-func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dto.FlowResponsesDto, error) {
+func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Journey) (response_dto.FlowResponsesDto, error) {
 	methodName := "GetParsedFlowsResponse"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow")
 	dbConnection := f.DBService.GetDB()
@@ -160,19 +160,19 @@ func (f FlowServiceUtil) GetParsedFlowsResponse(flows []model.Flow) (response_dt
 	return response, nil
 }
 
-func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Flow {
+func (f FlowServiceUtil) FetchFlowByIdFromDB(flowExternalId string) model.Journey {
 	methodName := "FetchFlowByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for flow id ", flowExternalId)
-	var flow model.Flow
+	var flow model.Journey
 	f.FieldRepository = new(repository.FieldRepository)
 	flow = f.FieldRepository.FindByExternalId(flowExternalId)
 	return flow
 }
 
-func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.Flow,
-	completeModuleVersionNumberList map[int]bool,moduleVersionsMap map[int]model.ModuleVersion,
-	completeSectionVersionNumberList map[int]bool,sectionVersionsMap map[int]model.SectionVersion,
-	completeFieldVersionNumberList map[int]bool,fieldVersionsMap map[int]model.FieldVersion) (response_dto.FlowResponseDto, error) {
+func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.Journey,
+	completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion,
+	completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion,
+	completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) (response_dto.FlowResponseDto, error) {
 	methodName := "ConstructFlowResponseWithModuleFieldSection"
 	logger.SugarLogger.Info(methodName, "fetching the response for flow data")
 
@@ -236,7 +236,7 @@ func (f FlowServiceUtil) ConstructFlowResponseWithModuleFieldSection(flow model.
 	return flowResponseDto, nil
 }
 
-func (f FlowServiceUtil) FetchModuleData(flow model.Flow) ([]model.ModuleVersion, map[int]bool) {
+func (f FlowServiceUtil) FetchModuleData(flow model.Journey) ([]model.ModuleVersion, map[int]bool) {
 	methodName := "FetchModuleData"
 	var moduleVersionList []int
 	completeModuleVersionNumberList := make(map[int]bool)
@@ -250,7 +250,7 @@ func (f FlowServiceUtil) FetchModuleData(flow model.Flow) ([]model.ModuleVersion
 		}
 	}
 	moduleVersions = f.ModuleRepository.FetchModuleFromModuleVersion(completeModuleVersionNumberList)
-	return moduleVersions,completeModuleVersionNumberList
+	return moduleVersions, completeModuleVersionNumberList
 }
 
 func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion) ([]model.SectionVersion, map[int]model.ModuleVersion, map[int]bool) {
@@ -275,7 +275,6 @@ func (f FlowServiceUtil) FetchSectionsData(moduleVersions []model.ModuleVersion)
 	sectionVersions = f.SectionRepository.FetchSectionFromSectionVersions(completeSectionVersionNumberList)
 	return sectionVersions, moduleVersionsMap, completeSectionVersionNumberList
 }
-
 
 func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) ([]model.FieldVersion, map[int]model.SectionVersion, map[int]bool, map[int]model.FieldVersion) {
 	methodName := "FetchFieldData"
@@ -304,5 +303,5 @@ func (f FlowServiceUtil) FetchFieldData(sectionVersions []model.SectionVersion) 
 	for _, fv := range fieldVersions {
 		fieldVersionsMap[fv.Id] = fv
 	}
-	return fieldVersions,sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap
+	return fieldVersions, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap
 }
