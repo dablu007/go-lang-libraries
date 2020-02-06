@@ -28,7 +28,7 @@ type JourneyServiceUtility interface {
 }
 
 type JourneyServiceUtil struct {
-	MapUtil           *utility.MapUtil
+	MapUtil           utility.MapUtility
 	DBService         *db.DBService
 	JourneyRepository repository.JourneyRepository
 	FieldRepository   repository.FieldRepository
@@ -36,7 +36,7 @@ type JourneyServiceUtil struct {
 	SectionRepository repository.SectionRepository
 }
 
-func NewJourneyServiceUtil(util *utility.MapUtil, dBService *db.DBService, journeyRepository repository.JourneyRepository,
+func NewJourneyServiceUtil(util utility.MapUtility, dBService *db.DBService, journeyRepository repository.JourneyRepository,
 	fieldRepository repository.FieldRepository, moduleRepository repository.ModuleRepository,
 	sectionRepository repository.SectionRepository) *JourneyServiceUtil {
 	service := &JourneyServiceUtil{
