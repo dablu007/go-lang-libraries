@@ -232,3 +232,48 @@ func (f JourneyServiceUtil) getFieldVersionResponseDto(fieldVersion model.FieldV
 	json.Unmarshal([]byte(fieldVersion.Properties), &fieldVersionResponseDto.Properties)
 	return fieldVersionResponseDto
 }
+
+func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, moduleVersions map[int]model.ModuleVersion,
+	sectionVersions map[int]model.SectionVersion, fieldVersions map[int]model.FieldVersion) response_dto.JourneyResponseDtoList {
+	methodName := "ConstructFlowResponseAsList"
+	logger.SugarLogger.Info(methodName, "fetching the response for journey data")
+
+	journeyResponseDtoList := response_dto.JourneyResponseDtoList{
+		Name:       journey.Name,
+		ExternalId: journey.ExternalId,
+		Version:    journey.Version,
+		Type:       journey.Type.String()}
+	var moduleVersionList []response_dto.ResponseDTO
+	var sectionVersionList []response_dto.ResponseDTO
+	var fieldVersionsList []response_dto.ResponseDTO
+	for _, value := range moduleVersions {
+		dto := response_dto.ResponseDTO{
+			Name:       value.Name,
+			Version:    value.Version,
+			ExternalId: value.ExternalId,
+		}
+		moduleVersionList = append(moduleVersionList,dto)
+	}
+
+	for _, value := range sectionVersions {
+		dto := response_dto.ResponseDTO{
+			Name:       value.Name,
+			Version:    value.Version,
+			ExternalId: value.ExternalId,
+		}
+		sectionVersionList = append(sectionVersionList,dto)
+	}
+	for _, value := range fieldVersions {
+		dto := response_dto.ResponseDTO{
+			Name:       value.Name,
+			Version:    value.Version,
+			ExternalId: value.ExternalId,
+		}
+		fieldVersionsList = append(fieldVersionsList,dto)
+	}
+	journeyResponseDtoList.Modules = moduleVersionList
+	journeyResponseDtoList.Sections = sectionVersionList
+	journeyResponseDtoList.Fields = fieldVersionsList
+
+	return journeyResponseDtoList
+}
