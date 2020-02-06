@@ -54,7 +54,8 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 	methodName := "GetJourneyById:"
 	fn := func(c *gin.Context) {
 		journeyId := c.Param("journeyId")
-		var isNested, err = strconv.ParseBool(c.Query("isNested"))
+		var isNested = c.Query("isNested")
+		var nestedValue, err = strconv.ParseBool(isNested)
 
 		logger.SugarLogger.Info(methodName, "Recieved request to get Journey by JourneyId ", journeyId)
 		if len(journeyId) <= 0 {
@@ -62,7 +63,11 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{})
 			return
 		}
-		if isNested == false {
+		if err != nil && len(isNested) > 0 {
+			c.JSON(http.StatusBadRequest, gin.H{})
+			return
+		}
+		if nestedValue == false {
 			flow := u.journeyService.GetJourneyDetailsAsList(journeyId)
 			if len(flow.Name) > 0 {
 				c.JSON(http.StatusOK, flow)
@@ -71,9 +76,6 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return
 			}
-		}
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{})
 		}
 		flow := u.journeyService.GetJourneyById(journeyId)
 		if len(flow.Name) > 0 {
