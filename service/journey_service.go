@@ -112,7 +112,7 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 	return journeyResponseDto
 }
 
-func (f JourneyService) GetJourneyByIdNotNested(journeyExternalId string) response_dto.JourneyResponseDtoList {
+func (f JourneyService) GetJourneyDetailsAsList(journeyExternalId string) response_dto.JourneyResponseDtoList {
 	methodName := "GetJourneyById"
 	logger.SugarLogger.Info(methodName, "Recieved request to get flow id ", journeyExternalId)
 	redisClient := cache.GetRedisClient()
@@ -135,7 +135,7 @@ func (f JourneyService) GetJourneyByIdNotNested(journeyExternalId string) respon
 			return journeyResponseDto
 		}
 		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, _, _, _ := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flow)
-		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseNotNested(flow,moduleVersionsMap,sectionVersionsMap,fieldVersionsMap)
+		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseAsList(flow,moduleVersionsMap,sectionVersionsMap,fieldVersionsMap)
 
 		response, err := json.Marshal(flowsResponse)
 		if err != nil {

@@ -233,9 +233,9 @@ func (f JourneyServiceUtil) getFieldVersionResponseDto(fieldVersion model.FieldV
 	return fieldVersionResponseDto
 }
 
-func (f JourneyServiceUtil) ConstructFlowResponseNotNested(journey model.Journey, moduleVersions map[int]model.ModuleVersion,
+func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, moduleVersions map[int]model.ModuleVersion,
 	sectionVersions map[int]model.SectionVersion, fieldVersions map[int]model.FieldVersion) response_dto.JourneyResponseDtoList {
-	methodName := "ConstructFlowResponseNotNested"
+	methodName := "ConstructFlowResponseAsList"
 	logger.SugarLogger.Info(methodName, "fetching the response for journey data")
 
 	journeyResponseDtoList := response_dto.JourneyResponseDtoList{

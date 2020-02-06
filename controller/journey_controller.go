@@ -62,8 +62,8 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{})
 			return
 		}
-		if isNested == false || err != nil {
-			flow := u.journeyService.GetJourneyByIdNotNested(journeyId)
+		if isNested == false {
+			flow := u.journeyService.GetJourneyDetailsAsList(journeyId)
 			if len(flow.Name) > 0 {
 				c.JSON(http.StatusOK, flow)
 				return
@@ -71,6 +71,9 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return
 			}
+		}
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{})
 		}
 		flow := u.journeyService.GetJourneyById(journeyId)
 		if len(flow.Name) > 0 {
