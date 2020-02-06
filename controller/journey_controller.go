@@ -5,6 +5,7 @@ import (
 	"flow/service"
 	"flow/utility"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,14 +54,15 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 	methodName := "GetJourneyById:"
 	fn := func(c *gin.Context) {
 		journeyId := c.Param("journeyId")
-		var isNested = c.GetBool("isNested")
+		var isNested, err = strconv.ParseBool(c.Query("isNested"))
+
 		logger.SugarLogger.Info(methodName, "Recieved request to get Journey by JourneyId ", journeyId)
 		if len(journeyId) <= 0 {
 			logger.SugarLogger.Info(methodName, " journey id passed is empty or null ", journeyId)
 			c.JSON(http.StatusBadRequest, gin.H{})
 			return
 		}
-		if isNested == false {
+		if isNested == false || err != nil {
 			flow := u.journeyService.GetJourneyByIdNotNested(journeyId)
 			if len(flow.Name) > 0 {
 				c.JSON(http.StatusOK, flow)
