@@ -5,7 +5,7 @@ import (
 	"flow/enum/flow_status"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 )
 
 type Journey struct {

@@ -3,6 +3,10 @@ package server
 import (
 	"flow/auth"
 	"flow/controller"
+	"flow/db"
+	"flow/db/repository"
+	"flow/service"
+	"flow/utility"
 	"fmt"
 	"os"
 
@@ -20,7 +24,7 @@ func NewRouter() *gin.Engine {
 	cacheController := new(controller.CacheController)
 	appName := "Flow CJM"
 	cfg := newrelic.NewConfig(appName, viper.GetString("newrelic.licensekey"))
-	cfg.Logger = newrelic.NewDebugLogger(os.Stdout)
+	cfg.Logger = newrelic.NewLogger(os.Stdout)
 	app, err := newrelic.NewApplication(cfg)
 	if nil != err {
 		fmt.Println(err)
@@ -35,9 +39,19 @@ func NewRouter() *gin.Engine {
 	{
 		group := v1.Group("/")
 		{
-			flowController := new(controller.FlowController)
-			group.GET("journeys", flowController.GetFlows())
-			group.GET("journeys/:journeyId", flowController.GetFlowById())
+			//flowController := new(controller.JourneyController)
+			validator := utility.NewRequestValidator()
+			mapUtil := utility.NewMapUtil()
+			dbService := new(db.DBService)
+			journeyRepo := repository.NewJourneyRepository()
+			fieldRepo := repository.NewFieldRepository()
+			moduleRepo := repository.NewModuleRepository()
+			sectionRepo := repository.NewSectionRepository()
+			journeyServiceUtil := service.NewJourneyServiceUtil(mapUtil, dbService, journeyRepo, fieldRepo, moduleRepo, sectionRepo)
+			service := service.NewJourneyService(journeyServiceUtil, validator)
+			flowController := controller.NewJourneyController(service, validator)
+			group.GET("journeys", flowController.GetJourneys())
+			group.GET("journeys/:journeyId", flowController.GetJourneyById())
 
 		}
 	}

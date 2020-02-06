@@ -1,10 +1,10 @@
 package response_dto
 
 import (
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 )
 
-type FlowResponseDto struct {
+type JourneyResponseDto struct {
 	Name       string                     `json:"name"`
 	ExternalId uuid.UUID                  `json:"external_id"`
 	Version    string                     `json:"version"`

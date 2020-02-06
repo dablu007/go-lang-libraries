@@ -5,7 +5,17 @@ import (
 	"regexp"
 )
 
+type RequestValidatorUtil interface {
+	IsValidRequest(merchantId string, tenantId string, channelId string) bool
+	IsValidUUID(uuid string) bool
+	GenerateRedisKey(merchantId string, tenantId string, channelId string) string
+}
+
 type RequestValidator struct {
+}
+
+func NewRequestValidator() *RequestValidator {
+	return &RequestValidator{}
 }
 
 func (u RequestValidator) IsValidRequest(merchantId string, tenantId string, channelId string) bool {

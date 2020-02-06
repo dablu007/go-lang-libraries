@@ -2,27 +2,31 @@ package repository
 
 import (
 	"flow/db"
+	"flow/enum"
 	"flow/logger"
 	"flow/model"
 	"flow/utility"
 )
 
-type Repository interface {
+type FieldRepository interface {
 	FetchFieldFromFieldVersion(completeFieldVersionNumberList map[int]bool) []model.FieldVersion
-	FindByExternalId(flowExternalId string) model.Journey
+	FetchFieldVersions(fieldStatus enum.Status, fieldVersionNumbers []int) []model.FieldVersion
 }
-type FieldRepository struct {
+
+type FieldRepositoryImpl struct {
 	MapUtil   utility.MapUtil
 	DBService db.DBService
 }
 
-func NewFieldRepository(DBService db.DBService) *FieldRepository {
-	repo := &FieldRepository{
-		DBService: DBService,
+func NewFieldRepository() *FieldRepositoryImpl {
+	repo := &FieldRepositoryImpl{
+		MapUtil:utility.MapUtil{},
+		DBService:db.DBService{},
 	}
 	return repo
 }
-func (f FieldRepository) FetchFieldFromFieldVersion(completeFieldVersionNumberList map[int]bool) []model.FieldVersion {
+
+func (f *FieldRepositoryImpl) FetchFieldFromFieldVersion(completeFieldVersionNumberList map[int]bool) []model.FieldVersion {
 	methodName := "FetchFieldFromFieldVersion"
 	logger.SugarLogger.Info(methodName, " Fetching the field data with join on field versions")
 	var fieldVersions []model.FieldVersion
@@ -35,9 +39,14 @@ func (f FieldRepository) FetchFieldFromFieldVersion(completeFieldVersionNumberLi
 	return fieldVersions
 }
 
-func (f FieldRepository) FindByExternalId(flowExternalId string) model.Journey {
-	var flow model.Journey
+func (f *FieldRepositoryImpl) FetchFieldVersions(fieldStatus enum.Status, fieldVersionNumbers []int) []model.FieldVersion {
+	methodName := "FetchFieldVersions"
+	logger.SugarLogger.Info(methodName, " Fetching the field data with join on field versions with field status %s", fieldStatus.String())
+	var fieldVersions []model.FieldVersion
 	dbConnection := f.DBService.GetDB()
-	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&flow)
-	return flow
+	if dbConnection == nil {
+		return fieldVersions
+	}
+	dbConnection.Joins("JOIN field ON field.id = field_version.field_id and field.status = ? and field.deleted_on is NULL", fieldStatus).Where("field_version.id in (?) and field_version.deleted_on is NULL", fieldVersionNumbers).Find(&fieldVersions)
+	return fieldVersions
 }

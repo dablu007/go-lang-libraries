@@ -43,5 +43,4 @@ func (u CacheController) DeleteCacheEntry() gin.HandlerFunc {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input parameters."})
 	}
 	return fn
-
 }
