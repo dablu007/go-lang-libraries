@@ -63,7 +63,7 @@ func (mr *MockJourneyServiceUtilityMockRecorder) FetchJourneyByIdFromDB(flowExte
 }
 
 // GetModuleSectionAndFieldVersionsAndActiveVersionNumberList mocks base method
-func (m *MockJourneyServiceUtility) GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (map[int]model.ModuleVersion, map[int]model.SectionVersion, map[int]model.FieldVersion, map[int]bool, map[int]bool, map[int]bool) {
+func (m *MockJourneyServiceUtility) GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (map[int]model.ModuleVersion, map[int]model.SectionVersion, map[int]model.FieldVersion) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{}
 	for _, a := range journeys {
@@ -73,10 +73,7 @@ func (m *MockJourneyServiceUtility) GetModuleSectionAndFieldVersionsAndActiveVer
 	ret0, _ := ret[0].(map[int]model.ModuleVersion)
 	ret1, _ := ret[1].(map[int]model.SectionVersion)
 	ret2, _ := ret[2].(map[int]model.FieldVersion)
-	ret3, _ := ret[3].(map[int]bool)
-	ret4, _ := ret[4].(map[int]bool)
-	ret5, _ := ret[5].(map[int]bool)
-	return ret0, ret1, ret2, ret3, ret4, ret5
+	return ret0, ret1, ret2
 }
 
 // GetModuleSectionAndFieldVersionsAndActiveVersionNumberList indicates an expected call of GetModuleSectionAndFieldVersionsAndActiveVersionNumberList
@@ -86,29 +83,43 @@ func (mr *MockJourneyServiceUtilityMockRecorder) GetModuleSectionAndFieldVersion
 }
 
 // ConstructJourneysResponse mocks base method
-func (m *MockJourneyServiceUtility) ConstructJourneysResponse(journeys []model.Journey, moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion, completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList map[int]bool) response_dto.JourneyResponsesDto {
+func (m *MockJourneyServiceUtility) ConstructJourneysResponse(journeys []model.Journey, moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponsesDto {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ConstructJourneysResponse", journeys, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList)
+	ret := m.ctrl.Call(m, "ConstructJourneysResponse", journeys, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 	ret0, _ := ret[0].(response_dto.JourneyResponsesDto)
 	return ret0
 }
 
 // ConstructJourneysResponse indicates an expected call of ConstructJourneysResponse
-func (mr *MockJourneyServiceUtilityMockRecorder) ConstructJourneysResponse(journeys, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList interface{}) *gomock.Call {
+func (mr *MockJourneyServiceUtilityMockRecorder) ConstructJourneysResponse(journeys, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConstructJourneysResponse", reflect.TypeOf((*MockJourneyServiceUtility)(nil).ConstructJourneysResponse), journeys, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConstructJourneysResponse", reflect.TypeOf((*MockJourneyServiceUtility)(nil).ConstructJourneysResponse), journeys, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 }
 
 // ConstructFlowResponseWithModuleFieldSection mocks base method
-func (m *MockJourneyServiceUtility) ConstructFlowResponseWithModuleFieldSection(journey model.Journey, completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion, completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion, completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto {
+func (m *MockJourneyServiceUtility) ConstructFlowResponseWithModuleFieldSection(journey model.Journey, moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ConstructFlowResponseWithModuleFieldSection", journey, completeModuleVersionNumberList, moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap)
+	ret := m.ctrl.Call(m, "ConstructFlowResponseWithModuleFieldSection", journey, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 	ret0, _ := ret[0].(response_dto.JourneyResponseDto)
 	return ret0
 }
 
 // ConstructFlowResponseWithModuleFieldSection indicates an expected call of ConstructFlowResponseWithModuleFieldSection
-func (mr *MockJourneyServiceUtilityMockRecorder) ConstructFlowResponseWithModuleFieldSection(journey, completeModuleVersionNumberList, moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap interface{}) *gomock.Call {
+func (mr *MockJourneyServiceUtilityMockRecorder) ConstructFlowResponseWithModuleFieldSection(journey, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConstructFlowResponseWithModuleFieldSection", reflect.TypeOf((*MockJourneyServiceUtility)(nil).ConstructFlowResponseWithModuleFieldSection), journey, completeModuleVersionNumberList, moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConstructFlowResponseWithModuleFieldSection", reflect.TypeOf((*MockJourneyServiceUtility)(nil).ConstructFlowResponseWithModuleFieldSection), journey, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
+}
+
+// ConstructFlowResponseAsList mocks base method
+func (m *MockJourneyServiceUtility) ConstructFlowResponseAsList(journey model.Journey, moduleVersions map[int]model.ModuleVersion, sectionVersions map[int]model.SectionVersion, fieldVersions map[int]model.FieldVersion) response_dto.JourneyResponseDtoList {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ConstructFlowResponseAsList", journey, moduleVersions, sectionVersions, fieldVersions)
+	ret0, _ := ret[0].(response_dto.JourneyResponseDtoList)
+	return ret0
+}
+
+// ConstructFlowResponseAsList indicates an expected call of ConstructFlowResponseAsList
+func (mr *MockJourneyServiceUtilityMockRecorder) ConstructFlowResponseAsList(journey, moduleVersions, sectionVersions, fieldVersions interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConstructFlowResponseAsList", reflect.TypeOf((*MockJourneyServiceUtility)(nil).ConstructFlowResponseAsList), journey, moduleVersions, sectionVersions, fieldVersions)
 }

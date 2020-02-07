@@ -15,16 +15,16 @@ type JourneyServiceUtility interface {
 	FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey
 	FetchJourneyByIdFromDB(flowExternalId string) model.Journey
 	GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
-		moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion,
-		completeModuleVersionNumberList map[int]bool, completeSectionVersionNumberList map[int]bool, completeFieldVersionNumberList map[int]bool)
+		moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion,
+		fieldVersionsMap map[int]model.FieldVersion)
 	ConstructJourneysResponse(journeys []model.Journey, moduleVersionsMap map[int]model.ModuleVersion,
 		sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion,
-		completeModuleVersionNumberList map[int]bool, completeSectionVersionNumberList map[int]bool,
-		completeFieldVersionNumberList map[int]bool) response_dto.JourneyResponsesDto
+	) response_dto.JourneyResponsesDto
 	ConstructFlowResponseWithModuleFieldSection(journey model.Journey,
-		completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion,
-		completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion,
-		completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto
+		moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion,
+		fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto
+	ConstructFlowResponseAsList(journey model.Journey, moduleVersions map[int]model.ModuleVersion,
+		sectionVersions map[int]model.SectionVersion, fieldVersions map[int]model.FieldVersion) response_dto.JourneyResponseDtoList
 }
 
 type JourneyServiceUtil struct {
@@ -63,20 +63,19 @@ func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.
 }
 
 func (f JourneyServiceUtil) GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
-	moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion,
-	completeModuleVersionNumberList map[int]bool, completeSectionVersionNumberList map[int]bool, completeFieldVersionNumberList map[int]bool) {
+	moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) {
 	methodName := "GetModuleSectionAndFieldVersionsAndActiveVersionNumberList"
 	// logger.SugarLogger.Info(methodName, "fetching the response for flow")
 
-	completeModuleVersionNumberList = make(map[int]bool)
+	var completeModuleVersionNumberList = make(map[int]bool)
 	var moduleVersions []model.ModuleVersion
 	moduleVersionsMap = make(map[int]model.ModuleVersion)
 
-	completeSectionVersionNumberList = make(map[int]bool)
+	var completeSectionVersionNumberList = make(map[int]bool)
 	var sectionVersions []model.SectionVersion
 	sectionVersionsMap = make(map[int]model.SectionVersion)
 
-	completeFieldVersionNumberList = make(map[int]bool)
+	var completeFieldVersionNumberList = make(map[int]bool)
 	var fieldVersions []model.FieldVersion
 	fieldVersionsMap = make(map[int]model.FieldVersion)
 
@@ -132,28 +131,23 @@ func (f JourneyServiceUtil) GetModuleSectionAndFieldVersionsAndActiveVersionNumb
 		fieldVersionsMap[fv.Id] = fv
 	}
 
-	return moduleVersionsMap, sectionVersionsMap, fieldVersionsMap,
-		completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList
+	return moduleVersionsMap, sectionVersionsMap, fieldVersionsMap
 }
 
 func (f JourneyServiceUtil) ConstructJourneysResponse(journeys []model.Journey, moduleVersionsMap map[int]model.ModuleVersion,
-	sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion,
-	completeModuleVersionNumberList map[int]bool, completeSectionVersionNumberList map[int]bool,
-	completeFieldVersionNumberList map[int]bool) response_dto.JourneyResponsesDto {
+	sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponsesDto {
 	var response response_dto.JourneyResponsesDto
 	for _, journey := range journeys {
 		response.JourneyResponses = append(response.JourneyResponses, f.ConstructFlowResponseWithModuleFieldSection(journey,
-			completeModuleVersionNumberList, moduleVersionsMap,
-			completeSectionVersionNumberList, sectionVersionsMap,
-			completeFieldVersionNumberList, fieldVersionsMap))
+			moduleVersionsMap, sectionVersionsMap, fieldVersionsMap))
 	}
 	return response
 }
 
 func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey model.Journey,
-	completeModuleVersionNumberList map[int]bool, moduleVersionsMap map[int]model.ModuleVersion,
-	completeSectionVersionNumberList map[int]bool, sectionVersionsMap map[int]model.SectionVersion,
-	completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto {
+	moduleVersionsMap map[int]model.ModuleVersion,
+	sectionVersionsMap map[int]model.SectionVersion,
+	fieldVersionsMap map[int]model.FieldVersion) response_dto.JourneyResponseDto {
 	methodName := "ConstructFlowResponseWithModuleFieldSection"
 	logger.SugarLogger.Info(methodName, "fetching the response for journey data")
 
@@ -165,13 +159,14 @@ func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey 
 	var moduleVersionNumberList []int
 	json.Unmarshal([]byte(journey.ModuleVersions), &moduleVersionNumberList)
 	for _, mvn := range moduleVersionNumberList {
-		if completeModuleVersionNumberList[mvn] == true {
-			moduleVersion := moduleVersionsMap[mvn]
+
+		moduleVersion, found := moduleVersionsMap[mvn]
+		if found {
 			if (model.ModuleVersion{}) == moduleVersion {
 				continue
 			}
 			journeyResponseDto.Modules = append(journeyResponseDto.Modules, f.getModuleVersionResponseDto(moduleVersion,
-				completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap))
+				sectionVersionsMap, fieldVersionsMap))
 		}
 	}
 
@@ -179,8 +174,8 @@ func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey 
 	return journeyResponseDto
 }
 
-func (f JourneyServiceUtil) getModuleVersionResponseDto(moduleVersion model.ModuleVersion, completeSectionVersionNumberList map[int]bool,
-	sectionVersionsMap map[int]model.SectionVersion, completeFieldVersionNumberList map[int]bool,
+func (f JourneyServiceUtil) getModuleVersionResponseDto(moduleVersion model.ModuleVersion,
+	sectionVersionsMap map[int]model.SectionVersion,
 	fieldVersionsMap map[int]model.FieldVersion) response_dto.ModuleVersionResponseDto {
 	moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{
 		Name:       moduleVersion.Name,
@@ -190,19 +185,19 @@ func (f JourneyServiceUtil) getModuleVersionResponseDto(moduleVersion model.Modu
 	var sectionVersionNumberList []int
 	json.Unmarshal([]byte(moduleVersion.SectionVersions), &sectionVersionNumberList)
 	for _, svn := range sectionVersionNumberList {
-		if completeSectionVersionNumberList[svn] == true {
-			sectionVersion := sectionVersionsMap[svn]
+		sectionVersion, found := sectionVersionsMap[svn]
+		if found {
 			if (model.SectionVersion{}) == sectionVersion {
 				continue
 			}
 			moduleVersionResponseDto.Sections = append(moduleVersionResponseDto.Sections,
-				f.getSectionVersionResponseDto(sectionVersion, completeFieldVersionNumberList, fieldVersionsMap))
+				f.getSectionVersionResponseDto(sectionVersion, fieldVersionsMap))
 		}
 	}
 	return moduleVersionResponseDto
 }
 
-func (f JourneyServiceUtil) getSectionVersionResponseDto(sectionVersion model.SectionVersion, completeFieldVersionNumberList map[int]bool, fieldVersionsMap map[int]model.FieldVersion) response_dto.SectionVersionsResponseDto {
+func (f JourneyServiceUtil) getSectionVersionResponseDto(sectionVersion model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) response_dto.SectionVersionsResponseDto {
 	sectionVersionResponseDto := response_dto.SectionVersionsResponseDto{
 		Name:       sectionVersion.Name,
 		ExternalId: sectionVersion.ExternalId,
@@ -212,8 +207,8 @@ func (f JourneyServiceUtil) getSectionVersionResponseDto(sectionVersion model.Se
 	var fieldVersionNumberList []int
 	json.Unmarshal([]byte(sectionVersion.FieldVersions), &fieldVersionNumberList)
 	for _, fvn := range fieldVersionNumberList {
-		if completeFieldVersionNumberList[fvn] == true {
-			fieldVersion := fieldVersionsMap[fvn]
+		fieldVersion, found := fieldVersionsMap[fvn]
+		if found {
 			if (model.FieldVersion{}) == fieldVersion {
 				continue
 			}
@@ -238,6 +233,9 @@ func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, m
 	methodName := "ConstructFlowResponseAsList"
 	logger.SugarLogger.Info(methodName, "fetching the response for journey data")
 
+	if len(journey.Name) <= 0 {
+		return response_dto.JourneyResponseDtoList{}
+	}
 	journeyResponseDtoList := response_dto.JourneyResponseDtoList{
 		Name:       journey.Name,
 		ExternalId: journey.ExternalId,
@@ -252,7 +250,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, m
 			Version:    value.Version,
 			ExternalId: value.ExternalId,
 		}
-		moduleVersionList = append(moduleVersionList,dto)
+		moduleVersionList = append(moduleVersionList, dto)
 	}
 
 	for _, value := range sectionVersions {
@@ -261,7 +259,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, m
 			Version:    value.Version,
 			ExternalId: value.ExternalId,
 		}
-		sectionVersionList = append(sectionVersionList,dto)
+		sectionVersionList = append(sectionVersionList, dto)
 	}
 	for _, value := range fieldVersions {
 		dto := response_dto.ResponseDTO{
@@ -269,7 +267,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, m
 			Version:    value.Version,
 			ExternalId: value.ExternalId,
 		}
-		fieldVersionsList = append(fieldVersionsList,dto)
+		fieldVersionsList = append(fieldVersionsList, dto)
 	}
 	journeyResponseDtoList.Modules = moduleVersionList
 	journeyResponseDtoList.Sections = sectionVersionList
