@@ -14,9 +14,9 @@ type JourneyService struct {
 	RequestValidator   *utility.RequestValidator
 }
 
-func NewJourneyService(journeyService *JourneyServiceUtil, validator *utility.RequestValidator) *JourneyService {
+func NewJourneyService(journeyServiceUtil *JourneyServiceUtil, validator *utility.RequestValidator) *JourneyService {
 	service := &JourneyService{
-		JourneyServiceUtil: journeyService,
+		JourneyServiceUtil: journeyServiceUtil,
 		RequestValidator:   validator,
 	}
 	return service
@@ -44,10 +44,8 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 			TenantId:   tenantId,
 			ChannelId:  channelId}
 		flows := u.JourneyServiceUtil.FetchAllJourneysFromDB(flowContext)
-		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList,
-			completeFieldVersionNumberList := u.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flows...)
-		journeyResponse := u.JourneyServiceUtil.ConstructJourneysResponse(flows, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap,
-			completeModuleVersionNumberList, completeSectionVersionNumberList, completeFieldVersionNumberList)
+		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap := u.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flows...)
+		journeyResponse := u.JourneyServiceUtil.ConstructJourneysResponse(flows, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 
 		//Do not set redis key when there is no entry for given flowContext.
 		if len(journeyResponse.JourneyResponses) == 0 {
@@ -80,7 +78,6 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 		return journeyResponseDto
 	}
 	logger.SugarLogger.Info("Fetching the flow data from redis for journeyExternalId ", journeyExternalId)
-	//redisClient.FlushAll()
 	key := "journeyId:" + journeyExternalId + ":nested"
 	cachedFlow, err := redisClient.Get(key).Result()
 	if err != nil {
@@ -92,10 +89,8 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", journeyExternalId)
 			return journeyResponseDto
 		}
-		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, completeModuleVersionNumberList, completeSectionVersionNumberList,
-			completeFieldVersionNumberList := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flow)
-		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, completeModuleVersionNumberList,
-			moduleVersionsMap, completeSectionVersionNumberList, sectionVersionsMap, completeFieldVersionNumberList, fieldVersionsMap)
+		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flow)
+		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseWithModuleFieldSection(flow, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 
 		response, err := json.Marshal(flowsResponse)
 		if err != nil {
@@ -134,8 +129,8 @@ func (f JourneyService) GetJourneyDetailsAsList(journeyExternalId string) respon
 			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", journeyExternalId)
 			return journeyResponseDto
 		}
-		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap, _, _, _ := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flow)
-		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseAsList(flow,moduleVersionsMap,sectionVersionsMap,fieldVersionsMap)
+		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flow)
+		flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseAsList(flow, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 
 		response, err := json.Marshal(flowsResponse)
 		if err != nil {
