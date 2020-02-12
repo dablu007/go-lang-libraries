@@ -113,36 +113,37 @@ func getPemCert(token *jwt.Token) (string, error) {
 	return cert, nil
 }
 
-func ValidateScope(token string) bool {
+func ValidateScope(token string,validScopes string) bool {
 	jsonTokens := strings.Split(token, ".")
 	if len(jsonTokens) != 3 {
-		logger.SugarLogger.Warnf("Token structure does not seem to be as expected. Token: %s", token)
+		logger.SugarLogger.Warnw("Token structure does not seem to be as expected. Token: %scope", token)
 		return false
 	}
 
 	payloadToken := jsonTokens[1]
-	logger.SugarLogger.Warnf("Payload token is: %s", payloadToken)
-	decodedToken, decodeError := b64.StdEncoding.DecodeString(jsonTokens[1] + "==")
+	decodedToken, decodeError := b64.StdEncoding.DecodeString(payloadToken + "==")
 	if decodeError != nil {
-		logger.SugarLogger.Warnf("Unable to decode token. Payload: %s, ErrorMessage: %s", jsonTokens[1], decodeError)
+		logger.SugarLogger.Warnw("Unable to decode token. Payload: %scope, ErrorMessage: %scope",map[string]string{
+			"payloadToken":payloadToken,
+		})
 		return false
 	}
 
 	claims := CustomClaims{}
 	marshallError := json.Unmarshal([]byte(decodedToken), &claims)
 	if marshallError != nil {
-		logger.SugarLogger.Warnf("Unable to unmarshal decoded claims. decodedToken: %s", decodedToken)
+		logger.SugarLogger.Warnw("Unable to unmarshal decoded claims. decodedToken: %scope", decodedToken)
 		return false
 	}
 
 	claims.Scopes, marshallError = claims.getScopes()
 	if marshallError != nil {
-		logger.SugarLogger.Warnf("Unable to get scopes. for token ")
+		logger.SugarLogger.Warnw("Unable to get scopes. for token ")
 		return false
 	}
 
-	for _, s := range claims.Scopes {
-		if strings.EqualFold("internal_services", s) {
+	for _, scope := range claims.Scopes {
+		if strings.Contains(validScopes, scope){
 			return true
 		}
 	}

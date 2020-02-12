@@ -35,8 +35,8 @@ func (u JourneyController) GetJourneys() gin.HandlerFunc {
 		channelId := c.Query("channelId")
 		token := c.Request.Header.Get("Authorization")
 		logger.SugarLogger.Info(methodName, "Recieved request to get all the Journeys associated with merchant: ", merchantId)
-
-		if !auth.ValidateScope(token) {
+		var scopes = "internal_services"
+		if !auth.ValidateScope(token, scopes) {
 			logger.SugarLogger.Info(methodName, "Invalid scope passed for fetching data ")
 			c.JSON(http.StatusUnauthorized, "Invalid Scope")
 			return
@@ -66,7 +66,8 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 		var nestedValue, err = strconv.ParseBool(isNested)
 		token := c.Request.Header.Get("Authorization")
 		logger.SugarLogger.Info(methodName, "Recieved request to get Journey by JourneyId ", journeyId)
-		if !auth.ValidateScope(token) {
+		var scopes = "internal_services"
+		if !auth.ValidateScope(token, scopes) {
 			logger.SugarLogger.Info(methodName, "Invalid scope passed for fetching data ")
 			c.JSON(http.StatusUnauthorized, "Invalid Scope")
 			return
