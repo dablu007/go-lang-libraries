@@ -62,6 +62,15 @@ func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.
 	return journey
 }
 
+func (f JourneyServiceUtil) FetchJourneyByJourneyIdListFromDB(flowExternalIds []string) []model.Journey {
+	methodName := "FetchJourneyByJourneyIdListFromDB:"
+	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey ids ", )
+	var journeyList []model.Journey
+	journeyList = f.JourneyRepository.FindByExternalIds(flowExternalIds)
+	return journeyList
+}
+
+
 func (f JourneyServiceUtil) GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
 	moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) {
 	methodName := "GetModuleSectionAndFieldVersionsAndActiveVersionNumberList"

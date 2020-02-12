@@ -1,14 +1,15 @@
 package controller
 
 import (
+	"encoding/json"
 	"flow/auth"
 	"flow/logger"
 	"flow/service"
 	"flow/utility"
+	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 type JourneyController struct {
@@ -101,3 +102,45 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 	}
 	return fn
 }
+
+func (u JourneyController) GetJourneyListForJourneyIds() gin.HandlerFunc {
+	methodName := "GetJourneyById:"
+	fn := func(c *gin.Context) {
+		body, err := ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			logger.SugarLogger.Info(methodName, "Invalid body passed")
+			c.JSON(http.StatusUnauthorized, "Invalid Body passed")
+			return
+		}
+		var journeyIds []string
+		err = json.Unmarshal(body,&journeyIds)
+		if err != nil {
+			logger.SugarLogger.Info(methodName, "Unable to parse the body")
+			c.JSON(http.StatusUnauthorized, "Invalid Body passed")
+			return
+		}
+		token := c.Request.Header.Get("Authorization")
+		logger.SugarLogger.Info(methodName, "Recieved request to get Journey by JourneyId ", journeyIds)
+		if !auth.ValidateScope(token) {
+			logger.SugarLogger.Info(methodName, "Invalid scope passed for fetching data ")
+			c.JSON(http.StatusUnauthorized, "Invalid Scope")
+			return
+		}
+		if len(journeyIds) <= 0 {
+			logger.SugarLogger.Info(methodName, " journey id passed is empty or null ", journeyIds)
+			c.JSON(http.StatusBadRequest, gin.H{})
+			return
+		}
+		flow := u.journeyService.GetJourneyDetailsListForJourneyIds(journeyIds)
+		if len(flow) > 0 {
+			c.JSON(http.StatusOK, flow)
+			return
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{})
+			return
+		}
+
+	}
+	return fn
+}
+
