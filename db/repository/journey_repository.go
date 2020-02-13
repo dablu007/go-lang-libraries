@@ -9,6 +9,7 @@ import (
 
 type JourneyRepository interface {
 	FindByExternalId(flowExternalId string) model.Journey
+	FindByExternalIds(flowExternalId []string) []model.Journey
 	FindActiveJourneysByJourneyContext(merchantId string, tenantId string, channelId string) []model.Journey
 }
 
@@ -36,6 +37,13 @@ func (f JourneyRepositoryImpl) FindByExternalId(flowExternalId string) model.Jou
 	var journey model.Journey
 	dbConnection := f.DBService.GetDB()
 	dbConnection.Where(" external_id = ? ", flowExternalId).Find(&journey)
+	return journey
+}
+
+func (f JourneyRepositoryImpl) FindByExternalIds(flowExternalIds []string) []model.Journey {
+	var journey []model.Journey
+	dbConnection := f.DBService.GetDB()
+	dbConnection.Where(" external_id IN (?) ", flowExternalIds).Find(&journey)
 	return journey
 }
 

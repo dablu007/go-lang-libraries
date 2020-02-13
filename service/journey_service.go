@@ -7,6 +7,8 @@ import (
 	"flow/model"
 	"flow/model/response_dto"
 	"flow/utility"
+	"strings"
+	"time"
 )
 
 type JourneyService struct {
@@ -21,6 +23,8 @@ func NewJourneyService(journeyServiceUtil *JourneyServiceUtil, validator *utilit
 	}
 	return service
 }
+
+const ttl int = 24 * 60 * 60 * 5
 
 func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelId string) response_dto.JourneyResponsesDto {
 	methodName := "GetJourneys"
@@ -59,7 +63,7 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 		}
 
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", redisKey)
-		setStatus := redisClient.Set(redisKey, response, 0)
+		setStatus := redisClient.Set(redisKey, response, time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", redisKey)
 		return journeyResponse
 	}
@@ -98,7 +102,7 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 			return flowsResponse
 		}
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", journeyExternalId)
-		setStatus := redisClient.Set(key, response, 0)
+		setStatus := redisClient.Set(key, response, time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", journeyExternalId)
 		return flowsResponse
 	}
@@ -138,11 +142,55 @@ func (f JourneyService) GetJourneyDetailsAsList(journeyExternalId string) respon
 			return flowsResponse
 		}
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", journeyExternalId)
-		setStatus := redisClient.Set(key, response, 0)
+		setStatus := redisClient.Set(key,response,time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", journeyExternalId)
 		return flowsResponse
 	}
 	logger.SugarLogger.Info(methodName, " UnMarshlling the cached flow response")
 	json.Unmarshal([]byte(cachedFlow), &journeyResponseDto)
 	return journeyResponseDto
+}
+
+func (f JourneyService) GetJourneyDetailsListForJourneyIds(journeyExternalIds []string) []response_dto.JourneyResponseDtoList {
+	methodName := "GetJourneyDetailsListForJourneyIds"
+	logger.SugarLogger.Info(methodName, "Recieved request to get flow id ", journeyExternalIds)
+	redisClient := cache.GetRedisClient()
+	var journeyResponseDtoList []response_dto.JourneyResponseDtoList
+	if redisClient == nil {
+		logger.SugarLogger.Info(methodName, "Failed to connect with redis client. ")
+		return journeyResponseDtoList
+	}
+	journeyIds := strings.Join(journeyExternalIds,":")
+	logger.SugarLogger.Info("Fetching the flow data from redis for journeyExternalId ", journeyIds)
+	key := "journeyId:" + journeyIds
+	cachedFlow, err := redisClient.Get(key).Result()
+	if err != nil {
+		logger.SugarLogger.Info(methodName, "Failed to fetch flow from redis cache for journeyExternalId: ", journeyIds, " with error: ", err)
+	}
+	if len(cachedFlow) == 0 {
+		flow := f.JourneyServiceUtil.FetchJourneyByJourneyIdListFromDB(journeyExternalIds)
+		if len(flow) <= 0 {
+			logger.SugarLogger.Error(methodName, " Invalid flow id passed : ", journeyIds)
+			return journeyResponseDtoList
+		}
+		for _, journey := range flow {
+			moduleVersionsMap, sectionVersionsMap, fieldVersionsMap := f.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journey)
+			flowsResponse := f.JourneyServiceUtil.ConstructFlowResponseAsList(journey, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
+			journeyResponseDtoList = append(journeyResponseDtoList, flowsResponse)
+		}
+
+
+		response, err := json.Marshal(journeyResponseDtoList)
+		if err != nil {
+			logger.SugarLogger.Error(methodName, " failed to marshal response with err: will not be able to update redis", err)
+			return journeyResponseDtoList
+		}
+		logger.SugarLogger.Info(methodName, " Adding redis key: ", journeyIds)
+		setStatus := redisClient.Set(key, response, time.Duration(ttl))
+		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", journeyIds)
+		return journeyResponseDtoList
+	}
+	logger.SugarLogger.Info(methodName, " UnMarshlling the cached flow response")
+	json.Unmarshal([]byte(cachedFlow), &journeyResponseDtoList)
+	return journeyResponseDtoList
 }
