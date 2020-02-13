@@ -113,10 +113,10 @@ func getPemCert(token *jwt.Token) (string, error) {
 	return cert, nil
 }
 
-func ValidateScope(token string,validScopes string) bool {
+func ValidateScope(token string, validScope string) bool {
 	jsonTokens := strings.Split(token, ".")
 	if len(jsonTokens) != 3 {
-		logger.SugarLogger.Warnw("Token structure does not seem to be as expected. Token: %scope", token)
+		logger.SugarLogger.Warnw("Token structure does not seem to be as expected. Token: scope", token)
 		return false
 	}
 
@@ -145,7 +145,7 @@ func ValidateScope(token string,validScopes string) bool {
 	}
 
 	for _, scope := range claims.Scopes {
-		if strings.Contains(validScopes, scope){
+		if strings.Contains(validScope, scope){
 			return true
 		}
 	}
