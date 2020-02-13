@@ -123,7 +123,7 @@ func ValidateScope(token string,validScopes string) bool {
 	payloadToken := jsonTokens[1]
 	decodedToken, decodeError := b64.StdEncoding.DecodeString(payloadToken + "==")
 	if decodeError != nil {
-		logger.SugarLogger.Warnw("Unable to decode token. Payload: %scope, ErrorMessage: %scope",map[string]string{
+		logger.SugarLogger.Warnw("Unable to decode token. Payload token:",map[string]string{
 			"payloadToken":payloadToken,
 		})
 		return false
@@ -132,7 +132,9 @@ func ValidateScope(token string,validScopes string) bool {
 	claims := CustomClaims{}
 	marshallError := json.Unmarshal([]byte(decodedToken), &claims)
 	if marshallError != nil {
-		logger.SugarLogger.Warnw("Unable to unmarshal decoded claims. decodedToken: %scope", decodedToken)
+		logger.SugarLogger.Warnw("Unable to unmarshal decoded claims. decodedToken:", map[string]string{
+			"decodedToken": decodedToken,
+		})
 		return false
 	}
 
