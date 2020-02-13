@@ -1,14 +1,17 @@
 package auth
 
 import (
+	b64 "encoding/base64"
 	"encoding/json"
 	"errors"
+	"flow/logger"
 	"fmt"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"net/http"
+	"strings"
 )
 
 var jwtMiddleWare *jwtmiddleware.JWTMiddleware
@@ -27,7 +30,10 @@ type JSONWebKeys struct {
 }
 
 type CustomClaims struct {
-	Scope string `json:"scope"`
+	// Note that the scope can be string or an array
+	RawScope json.RawMessage `json:"scope"`
+	// Scopes need to be unmarshalled post the initial unmarshalling as we can't be sure of the type
+	Scopes []string `json:"-"`
 	jwt.StandardClaims
 }
 
@@ -106,3 +112,72 @@ func getPemCert(token *jwt.Token) (string, error) {
 
 	return cert, nil
 }
+
+func ValidateScope(token string, validScope string) bool {
+	jsonTokens := strings.Split(token, ".")
+	if len(jsonTokens) != 3 {
+		logger.SugarLogger.Warnw("Token structure does not seem to be as expected. Token: scope", token)
+		return false
+	}
+
+	payloadToken := jsonTokens[1]
+	decodedToken, decodeError := b64.StdEncoding.DecodeString(payloadToken + "==")
+	if decodeError != nil {
+		logger.SugarLogger.Warnw("Unable to decode token. Payload token:",map[string]string{
+			"payloadToken":payloadToken,
+		})
+		return false
+	}
+
+	claims := CustomClaims{}
+	marshallError := json.Unmarshal([]byte(decodedToken), &claims)
+	if marshallError != nil {
+		logger.SugarLogger.Warnw("Unable to unmarshal decoded claims. decodedToken:", map[string]string{
+			"decodedToken": string(decodedToken),
+		})
+		return false
+	}
+
+	claims.Scopes, marshallError = claims.getScopes()
+	if marshallError != nil {
+		logger.SugarLogger.Warnw("Unable to get scopes. for token ")
+		return false
+	}
+
+	for _, scope := range claims.Scopes {
+		if strings.Contains(validScope, scope){
+			return true
+		}
+	}
+	// Returning true if in-case it is not a customer token
+	return false
+}
+
+func (claims *CustomClaims) getScopes() ([]string, error) {
+	if len(claims.RawScope) == 0 {
+		logger.SugarLogger.Warnf("Scope raw message is empty. Claims: %s", claims)
+		return nil, errors.New("Scope raw message is empty")
+	}
+
+	switch claims.RawScope[0] {
+	case '"':
+		var scope string
+		if err := json.Unmarshal(claims.RawScope, &scope); err != nil {
+			logger.SugarLogger.Warnf("Unable to unmarshall stringified scope. RawScope: %s", claims.RawScope)
+			return nil, errors.New("Unable to unmarshall string scope")
+		}
+		return []string{scope}, nil
+
+	case '[':
+		var scopes []string
+		if err := json.Unmarshal(claims.RawScope, &scopes); err != nil {
+			logger.SugarLogger.Warnf("Unable to unmarshall arrayed scopes. RawScopes: %s", claims.RawScope)
+			return nil, errors.New("Unable to unmarshall arrayed scopes")
+		}
+		return scopes, nil
+	}
+	logger.SugarLogger.Warnf("Unable to unmarshal scopes. RawScopes: %s", claims.RawScope)
+	return nil, errors.New("Unable to unmarshal scopes")
+}
+
+
