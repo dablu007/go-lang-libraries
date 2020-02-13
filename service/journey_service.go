@@ -8,6 +8,7 @@ import (
 	"flow/model/response_dto"
 	"flow/utility"
 	"strings"
+	"time"
 )
 
 type JourneyService struct {
@@ -22,6 +23,8 @@ func NewJourneyService(journeyServiceUtil *JourneyServiceUtil, validator *utilit
 	}
 	return service
 }
+
+const ttl int = 24 * 60 * 60 * 5
 
 func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelId string) response_dto.JourneyResponsesDto {
 	methodName := "GetJourneys"
@@ -60,7 +63,7 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 		}
 
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", redisKey)
-		setStatus := redisClient.Set(redisKey, response, 0)
+		setStatus := redisClient.Set(redisKey, response, time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", redisKey)
 		return journeyResponse
 	}
@@ -99,7 +102,7 @@ func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.Jo
 			return flowsResponse
 		}
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", journeyExternalId)
-		setStatus := redisClient.Set(key, response, 0)
+		setStatus := redisClient.Set(key, response, time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", journeyExternalId)
 		return flowsResponse
 	}
@@ -139,7 +142,7 @@ func (f JourneyService) GetJourneyDetailsAsList(journeyExternalId string) respon
 			return flowsResponse
 		}
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", journeyExternalId)
-		setStatus := redisClient.Set(key, response, 0)
+		setStatus := redisClient.Set(key,response,time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", journeyExternalId)
 		return flowsResponse
 	}
@@ -183,7 +186,7 @@ func (f JourneyService) GetJourneyDetailsListForJourneyIds(journeyExternalIds []
 			return journeyResponseDtoList
 		}
 		logger.SugarLogger.Info(methodName, " Adding redis key: ", journeyIds)
-		setStatus := redisClient.Set(key, response, 0)
+		setStatus := redisClient.Set(key, response, time.Duration(ttl))
 		logger.SugarLogger.Info(methodName, " Set redis key status: ", setStatus.Val(), " for key: ", journeyIds)
 		return journeyResponseDtoList
 	}

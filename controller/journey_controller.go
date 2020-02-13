@@ -110,19 +110,20 @@ func (u JourneyController) GetJourneyListForJourneyIds() gin.HandlerFunc {
 		body, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
 			logger.SugarLogger.Info(methodName, "Invalid body passed")
-			c.JSON(http.StatusUnauthorized, "Invalid Body passed")
+			c.JSON(http.StatusBadRequest, "Invalid Body passed")
 			return
 		}
 		var journeyIds []string
 		err = json.Unmarshal(body,&journeyIds)
 		if err != nil {
 			logger.SugarLogger.Info(methodName, "Unable to parse the body")
-			c.JSON(http.StatusUnauthorized, "Invalid Body passed")
+			c.JSON(http.StatusBadRequest, "Invalid Body passed")
 			return
 		}
 		token := c.Request.Header.Get("Authorization")
 		logger.SugarLogger.Info(methodName, "Recieved request to get Journey by JourneyId ", journeyIds)
-		if !auth.ValidateScope(token) {
+		var scopes = "internal_services"
+		if !auth.ValidateScope(token,scopes) {
 			logger.SugarLogger.Info(methodName, "Invalid scope passed for fetching data ")
 			c.JSON(http.StatusUnauthorized, "Invalid Scope")
 			return
@@ -137,7 +138,7 @@ func (u JourneyController) GetJourneyListForJourneyIds() gin.HandlerFunc {
 			c.JSON(http.StatusOK, flow)
 			return
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{})
+			c.JSON(http.StatusNotFound, gin.H{})
 			return
 		}
 

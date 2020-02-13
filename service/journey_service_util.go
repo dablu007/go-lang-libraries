@@ -64,7 +64,7 @@ func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.
 
 func (f JourneyServiceUtil) FetchJourneyByJourneyIdListFromDB(flowExternalIds []string) []model.Journey {
 	methodName := "FetchJourneyByJourneyIdListFromDB:"
-	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey ids ", )
+	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey ids ", flowExternalIds)
 	var journeyList []model.Journey
 	journeyList = f.JourneyRepository.FindByExternalIds(flowExternalIds)
 	return journeyList
