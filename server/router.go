@@ -3,10 +3,6 @@ package server
 import (
 	"flow/auth"
 	"flow/controller"
-	"flow/db"
-	"flow/db/repository"
-	"flow/service"
-	"flow/utility"
 	"fmt"
 	"os"
 
@@ -39,19 +35,9 @@ func NewRouter() *gin.Engine {
 	{
 		group := v1.Group("/")
 		{
-			//flowController := new(controller.JourneyController)
-			validator := utility.NewRequestValidator()
-			mapUtil := utility.NewMapUtil()
-			dbService := new(db.DBService)
-			journeyRepo := repository.NewJourneyRepository()
-			fieldRepo := repository.NewFieldRepository()
-			moduleRepo := repository.NewModuleRepository()
-			sectionRepo := repository.NewSectionRepository()
-			journeyServiceUtil := service.NewJourneyServiceUtil(mapUtil, dbService, journeyRepo, fieldRepo, moduleRepo, sectionRepo)
-			service := service.NewJourneyService(journeyServiceUtil, validator)
-			flowController := controller.NewJourneyController(service, validator)
 			group.GET("journeys", flowController.GetJourneys())
 			group.GET("journeys/:journeyId", flowController.GetJourneyById())
+			group.POST("journeys/get-batch", flowController.GetJourneyListForJourneyIds())
 
 		}
 	}
