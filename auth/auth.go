@@ -133,7 +133,7 @@ func ValidateScope(token string, validScope string) bool {
 	marshallError := json.Unmarshal([]byte(decodedToken), &claims)
 	if marshallError != nil {
 		logger.SugarLogger.Warnw("Unable to unmarshal decoded claims. decodedToken:", map[string]string{
-			"decodedToken": decodedToken,
+			"decodedToken": string(decodedToken),
 		})
 		return false
 	}
