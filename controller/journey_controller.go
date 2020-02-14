@@ -88,7 +88,7 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 				c.JSON(http.StatusOK, flow)
 				return
 			} else {
-				c.JSON(http.StatusBadRequest, gin.H{})
+				c.JSON(http.StatusNotFound, gin.H{})
 				return
 			}
 		}
@@ -97,7 +97,7 @@ func (u JourneyController) GetJourneyById() gin.HandlerFunc {
 			c.JSON(http.StatusOK, flow)
 			return
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{})
+			c.JSON(http.StatusNotFound, gin.H{})
 			return
 		}
 	}
