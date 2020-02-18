@@ -53,6 +53,6 @@ func (f JourneyRepositoryImpl) FindActiveJourneysByJourneyContext(merchantId str
 	if dbConnection == nil {
 		return journeys
 	}
-	dbConnection.Debug().Where("flow_context->>'MerchantId' = ? and flow_context->>'TenantId' = ? and flow_context->>'ChannelId' = ? and status = ? and deleted_on is NULL", merchantId, tennatId, channelId, flow_status.Active).Find(&journeys)
+	dbConnection.Where("flow_context->>'MerchantId' = ? and flow_context->>'TenantId' = ? and flow_context->>'ChannelId' = ? and status = ? and deleted_on is NULL", merchantId, tennatId, channelId, flow_status.Active).Find(&journeys)
 	return journeys
 }
