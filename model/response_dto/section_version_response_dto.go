@@ -6,8 +6,8 @@ import (
 
 type SectionVersionsResponseDto struct {
 	Name       string                     `json:"name"`
-	ExternalId uuid.UUID                  `json:"external_id"`
-	IsVisible  bool                       `json:"is_visible"`
+	ExternalId uuid.UUID                  `json:"externalId"`
+	IsVisible  bool                       `json:"isVisible"`
 	Version    string                     `json:"verison"`
 	Properties []PropertryResponseDto     `json:"properties"`
 	Fields     []FieldVersionsResponseDto `json:"fields"`
