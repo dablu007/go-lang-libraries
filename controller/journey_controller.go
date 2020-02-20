@@ -77,7 +77,7 @@ func (u JourneyController) GetModuleById() gin.HandlerFunc {
 		}
 		resp := u.journeyService.GetModuleByModuleID(moduleId)
 		if resp.Name == "" {
-			c.JSON(http.StatusNotFound, "")
+			c.JSON(http.StatusNotFound, gin.H{})
 			return
 		}
 		c.JSON(http.StatusOK, resp)

@@ -36,8 +36,7 @@ func (f ModuleRepositoryImpl) FetchModuleVersion(moduleVersionExternalId string)
 	if dbConnection == nil || uuidParsingError!=nil{
 		return moduleVersion
 	}
-	moduleVersion.ExternalId = moduleVersionExternalIdAsUUID
-	dbConnection.Find(&moduleVersion)
+	dbConnection.Where("module_version.external_id = ?", moduleVersionExternalIdAsUUID).Find(&moduleVersion)
 	return moduleVersion
 }
 
