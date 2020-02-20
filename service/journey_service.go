@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"flow/cache"
+	"flow/db/repository"
 	"flow/logger"
 	"flow/model"
 	"flow/model/response_dto"
@@ -70,6 +71,12 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 	logger.SugarLogger.Info(methodName, " UnMarshlling the cached flow response")
 	json.Unmarshal([]byte(cachedFlow), &journeyResponsesDto)
 	return journeyResponsesDto
+}
+
+func (f JourneyService) GetModuleByModuleID(moduleID string) response_dto.ModuleVersionResponseDto{
+	moduleVersion := repository.NewModuleRepository().FetchModuleVersion(moduleID)
+	sectionVersionMap, fieldVersionMap := f.JourneyServiceUtil.GetSectionAndFieldVersionNumberList(moduleID)
+	return f.JourneyServiceUtil.getModuleVersionResponseDto(moduleVersion, sectionVersionMap, fieldVersionMap)
 }
 
 func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.JourneyResponseDto {

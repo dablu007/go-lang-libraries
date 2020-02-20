@@ -1,8 +1,9 @@
 package model
 
 import (
-	uuid "github.com/satori/go.uuid"
 	"time"
+
+	uuid "github.com/google/uuid"
 )
 
 type ModuleVersion struct {

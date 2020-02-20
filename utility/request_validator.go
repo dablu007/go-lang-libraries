@@ -2,7 +2,8 @@ package utility
 
 import (
 	"flow/logger"
-	"regexp"
+
+	"github.com/google/uuid"
 )
 
 type RequestValidatorUtil interface {
@@ -33,9 +34,9 @@ func (u RequestValidator) IsValidRequest(merchantId string, tenantId string, cha
 	return true
 }
 
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
+func IsValidUUID(id string) bool {
+	_, err := uuid.Parse(id)
+	return err == nil
 }
 
 func (u RequestValidator) GenerateRedisKey(merchantId string, tenantId string, channelId string) string {

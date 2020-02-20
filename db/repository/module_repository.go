@@ -6,11 +6,14 @@ import (
 	"flow/logger"
 	"flow/model"
 	"flow/utility"
+
+	uuid "github.com/google/uuid"
 )
 
 type ModuleRepository interface {
 	FetchModuleFromModuleVersion(completeModuleVersionNumberList map[int]bool) []model.ModuleVersion
 	FetchModuleVersions(moduleStatus enum.Status, moduleVersionNumbers []int) []model.ModuleVersion
+	FetchModuleVersion(moduleVersionExternalId string) model.ModuleVersion
 }
 
 type ModuleRepositoryImpl struct {
@@ -20,10 +23,22 @@ type ModuleRepositoryImpl struct {
 
 func NewModuleRepository() *ModuleRepositoryImpl {
 	repo := &ModuleRepositoryImpl{
-		MapUtil:utility.MapUtil{},
+		MapUtil:   utility.MapUtil{},
 		DBService: db.DBService{},
 	}
 	return repo
+}
+
+func (f ModuleRepositoryImpl) FetchModuleVersion(moduleVersionExternalId string) model.ModuleVersion {
+	var moduleVersion model.ModuleVersion
+	dbConnection := f.DBService.GetDB()
+	moduleVersionExternalIdAsUUID, uuidParsingError := uuid.Parse(moduleVersionExternalId)
+	if dbConnection == nil || uuidParsingError!=nil{
+		return moduleVersion
+	}
+	moduleVersion.ExternalId = moduleVersionExternalIdAsUUID
+	dbConnection.Find(&moduleVersion)
+	return moduleVersion
 }
 
 func (f ModuleRepositoryImpl) FetchModuleFromModuleVersion(completeModuleVersionNumberList map[int]bool) []model.ModuleVersion {

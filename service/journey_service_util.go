@@ -70,6 +70,58 @@ func (f JourneyServiceUtil) FetchJourneyByJourneyIdListFromDB(flowExternalIds []
 	return journeyList
 }
 
+func (f JourneyServiceUtil) GetSectionAndFieldVersionNumberList(moduleVersionExternalID string) (
+	sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) {
+	methodName := "GetSectionAndFieldVersionsAndActiveVersionNumberList:"
+	// logger.SugarLogger.Info(methodName, "fetching the response for flow")
+
+	var completeSectionVersionNumberList = make(map[int]bool)
+	var sectionVersions []model.SectionVersion
+	sectionVersionsMap = make(map[int]model.SectionVersion)
+
+	var completeFieldVersionNumberList = make(map[int]bool)
+	var fieldVersions []model.FieldVersion
+	fieldVersionsMap = make(map[int]model.FieldVersion)
+
+	moduleVersion := f.ModuleRepository.FetchModuleVersion(moduleVersionExternalID)
+
+	var sectionNumberList []int
+
+	var sectionNumbers []int
+	json.Unmarshal([]byte(moduleVersion.SectionVersions), &sectionNumbers)
+	sectionNumberList = append(sectionNumberList, sectionNumbers...)
+
+	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
+	for _, num := range sectionNumberList {
+		if completeSectionVersionNumberList[num] == false {
+			completeSectionVersionNumberList[num] = true
+		}
+	}
+
+	sectionVersions = f.SectionRepository.FetchSectionFromSectionVersions(completeSectionVersionNumberList)
+
+	var fieldNumbersList []int
+	for _, sv := range sectionVersions {
+		sectionVersionsMap[sv.Id] = sv
+		var fieldNumbers []int
+		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
+		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
+	}
+
+	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
+	for _, num := range fieldNumbersList {
+		if completeFieldVersionNumberList[num] == false {
+			completeFieldVersionNumberList[num] = true
+		}
+	}
+
+	fieldVersions = f.FieldRepository.FetchFieldFromFieldVersion(completeFieldVersionNumberList)
+
+	for _, fv := range fieldVersions {
+		fieldVersionsMap[fv.Id] = fv
+	}
+	return sectionVersionsMap, fieldVersionsMap
+}
 
 func (f JourneyServiceUtil) GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
 	moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) {

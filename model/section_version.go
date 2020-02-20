@@ -1,7 +1,7 @@
 package model
 
 import (
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 	"time"
 )
 
