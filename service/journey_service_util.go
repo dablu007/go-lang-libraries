@@ -12,7 +12,6 @@ import (
 )
 
 type JourneyServiceUtility interface {
-	FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey
 	FetchJourneyByIdFromDB(flowExternalId string) model.Journey
 	GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
 		moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion,
@@ -48,10 +47,6 @@ func NewJourneyServiceUtil(util utility.MapUtility, dBService *db.DBService, jou
 		SectionRepository: sectionRepository,
 	}
 	return service
-}
-
-func (f JourneyServiceUtil) FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey {
-	return f.JourneyRepository.FindActiveJourneysByJourneyContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
 }
 
 func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.Journey {
