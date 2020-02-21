@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 )
 
 type FieldVersion struct {

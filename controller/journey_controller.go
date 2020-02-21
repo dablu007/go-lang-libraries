@@ -6,10 +6,11 @@ import (
 	"flow/logger"
 	"flow/service"
 	"flow/utility"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type JourneyController struct {
@@ -55,6 +56,31 @@ func (u JourneyController) GetJourneys() gin.HandlerFunc {
 		}
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
+	}
+	return fn
+}
+
+func (u JourneyController) GetModuleById() gin.HandlerFunc {
+	methodName := "GetModuleById:"
+	fn := func(c *gin.Context) {
+		moduleId := c.Param("moduleId")
+		token := c.Request.Header.Get("Authorization")
+		var scopes = "internal_services"
+		if !auth.ValidateScope(token, scopes) {
+			logger.SugarLogger.Info(methodName, "Invalid scope passed for fetching data ")
+			c.JSON(http.StatusUnauthorized, "Invalid Scope")
+			return
+		}
+		if !utility.IsValidUUID(moduleId) {
+			c.JSON(http.StatusBadRequest, "Invalid moduleId")
+			return
+		}
+		resp := u.journeyService.GetModuleByModuleID(moduleId)
+		if resp.Name == "" {
+			c.JSON(http.StatusNotFound, gin.H{})
+			return
+		}
+		c.JSON(http.StatusOK, resp)
 	}
 	return fn
 }
@@ -114,7 +140,7 @@ func (u JourneyController) GetJourneyListForJourneyIds() gin.HandlerFunc {
 			return
 		}
 		var journeyIds []string
-		err = json.Unmarshal(body,&journeyIds)
+		err = json.Unmarshal(body, &journeyIds)
 		if err != nil {
 			logger.SugarLogger.Info(methodName, "Unable to parse the body")
 			c.JSON(http.StatusBadRequest, "Invalid Body passed")
@@ -123,7 +149,7 @@ func (u JourneyController) GetJourneyListForJourneyIds() gin.HandlerFunc {
 		token := c.Request.Header.Get("Authorization")
 		logger.SugarLogger.Info(methodName, "Recieved request to get Journey by JourneyId ", journeyIds)
 		var scopes = "internal_services"
-		if !auth.ValidateScope(token,scopes) {
+		if !auth.ValidateScope(token, scopes) {
 			logger.SugarLogger.Info(methodName, "Invalid scope passed for fetching data ")
 			c.JSON(http.StatusUnauthorized, "Invalid Scope")
 			return
@@ -145,4 +171,3 @@ func (u JourneyController) GetJourneyListForJourneyIds() gin.HandlerFunc {
 	}
 	return fn
 }
-

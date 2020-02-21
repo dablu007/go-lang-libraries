@@ -38,6 +38,7 @@ func NewRouter() *gin.Engine {
 			group.GET("journeys", flowController.GetJourneys())
 			group.GET("journeys/:journeyId", flowController.GetJourneyById())
 			group.POST("journeys/get-batch", flowController.GetJourneyListForJourneyIds())
+			group.GET("modules/:moduleId", flowController.GetModuleById())
 
 		}
 	}

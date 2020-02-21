@@ -29,6 +29,6 @@ func init(){
 	moduleRepo = repository.NewModuleRepository()
 	sectionRepo = repository.NewSectionRepository()
 	journeyServiceUtil = service.NewJourneyServiceUtil(mapUtil, dbService, journeyRepo, fieldRepo, moduleRepo, sectionRepo)
-	journeyService = service.NewJourneyService(journeyServiceUtil, validator)
+	journeyService = service.NewJourneyService(journeyServiceUtil, validator, moduleRepo, journeyRepo)
 	flowController = controller.NewJourneyController(journeyService, validator)
 }

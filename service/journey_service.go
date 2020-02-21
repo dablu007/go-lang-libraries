@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"flow/cache"
+	"flow/db/repository"
 	"flow/logger"
 	"flow/model"
 	"flow/model/response_dto"
@@ -14,12 +15,16 @@ import (
 type JourneyService struct {
 	JourneyServiceUtil *JourneyServiceUtil
 	RequestValidator   *utility.RequestValidator
+	ModuleRepository repository.ModuleRepository
+	JourneyRepository repository.JourneyRepository
 }
 
-func NewJourneyService(journeyServiceUtil *JourneyServiceUtil, validator *utility.RequestValidator) *JourneyService {
+func NewJourneyService(journeyServiceUtil *JourneyServiceUtil, validator *utility.RequestValidator, moduleRepository repository.ModuleRepository, JourneyRepository repository.JourneyRepository ) *JourneyService {
 	service := &JourneyService{
 		JourneyServiceUtil: journeyServiceUtil,
 		RequestValidator:   validator,
+		ModuleRepository: moduleRepository,
+		JourneyRepository: JourneyRepository,
 	}
 	return service
 }
@@ -47,7 +52,7 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 			MerchantId: merchantId,
 			TenantId:   tenantId,
 			ChannelId:  channelId}
-		flows := u.JourneyServiceUtil.FetchAllJourneysFromDB(flowContext)
+		flows := u.JourneyRepository.FindActiveJourneysByJourneyContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
 		moduleVersionsMap, sectionVersionsMap, fieldVersionsMap := u.JourneyServiceUtil.GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(flows...)
 		journeyResponse := u.JourneyServiceUtil.ConstructJourneysResponse(flows, moduleVersionsMap, sectionVersionsMap, fieldVersionsMap)
 
@@ -70,6 +75,12 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 	logger.SugarLogger.Info(methodName, " UnMarshlling the cached flow response")
 	json.Unmarshal([]byte(cachedFlow), &journeyResponsesDto)
 	return journeyResponsesDto
+}
+
+func (f JourneyService) GetModuleByModuleID(moduleID string) response_dto.ModuleVersionResponseDto{
+	moduleVersion := f.ModuleRepository.FetchModuleVersion(moduleID)
+	sectionVersionMap, fieldVersionMap := f.JourneyServiceUtil.GetSectionAndFieldVersionNumberList(moduleID)
+	return f.JourneyServiceUtil.GetModuleVersionResponseDto(moduleVersion, sectionVersionMap, fieldVersionMap)
 }
 
 func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.JourneyResponseDto {

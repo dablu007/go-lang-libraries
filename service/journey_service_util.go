@@ -12,7 +12,6 @@ import (
 )
 
 type JourneyServiceUtility interface {
-	FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey
 	FetchJourneyByIdFromDB(flowExternalId string) model.Journey
 	GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
 		moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion,
@@ -50,10 +49,6 @@ func NewJourneyServiceUtil(util utility.MapUtility, dBService *db.DBService, jou
 	return service
 }
 
-func (f JourneyServiceUtil) FetchAllJourneysFromDB(flowContext model.FlowContext) []model.Journey {
-	return f.JourneyRepository.FindActiveJourneysByJourneyContext(flowContext.MerchantId, flowContext.TenantId, flowContext.ChannelId)
-}
-
 func (f JourneyServiceUtil) FetchJourneyByIdFromDB(flowExternalId string) model.Journey {
 	methodName := "FetchJourneyByIdFromDB:"
 	logger.SugarLogger.Info(methodName, " Fetching flows from db for journey id ", flowExternalId)
@@ -70,6 +65,58 @@ func (f JourneyServiceUtil) FetchJourneyByJourneyIdListFromDB(flowExternalIds []
 	return journeyList
 }
 
+func (f JourneyServiceUtil) GetSectionAndFieldVersionNumberList(moduleVersionExternalID string) (
+	sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) {
+	methodName := "GetSectionAndFieldVersionsAndActiveVersionNumberList:"
+	// logger.SugarLogger.Info(methodName, "fetching the response for flow")
+
+	var completeSectionVersionNumberList = make(map[int]bool)
+	var sectionVersions []model.SectionVersion
+	sectionVersionsMap = make(map[int]model.SectionVersion)
+
+	var completeFieldVersionNumberList = make(map[int]bool)
+	var fieldVersions []model.FieldVersion
+	fieldVersionsMap = make(map[int]model.FieldVersion)
+
+	moduleVersion := f.ModuleRepository.FetchModuleVersion(moduleVersionExternalID)
+
+	var sectionNumberList []int
+
+	var sectionNumbers []int
+	json.Unmarshal([]byte(moduleVersion.SectionVersions), &sectionNumbers)
+	sectionNumberList = append(sectionNumberList, sectionNumbers...)
+
+	logger.SugarLogger.Info(methodName, "list of sections ", sectionNumberList)
+	for _, num := range sectionNumberList {
+		if completeSectionVersionNumberList[num] == false {
+			completeSectionVersionNumberList[num] = true
+		}
+	}
+
+	sectionVersions = f.SectionRepository.FetchSectionFromSectionVersions(completeSectionVersionNumberList)
+
+	var fieldNumbersList []int
+	for _, sv := range sectionVersions {
+		sectionVersionsMap[sv.Id] = sv
+		var fieldNumbers []int
+		json.Unmarshal([]byte(sv.FieldVersions), &fieldNumbers)
+		fieldNumbersList = append(fieldNumbersList, fieldNumbers...)
+	}
+
+	logger.SugarLogger.Info(methodName, "list of fields ", fieldNumbersList)
+	for _, num := range fieldNumbersList {
+		if completeFieldVersionNumberList[num] == false {
+			completeFieldVersionNumberList[num] = true
+		}
+	}
+
+	fieldVersions = f.FieldRepository.FetchFieldFromFieldVersion(completeFieldVersionNumberList)
+
+	for _, fv := range fieldVersions {
+		fieldVersionsMap[fv.Id] = fv
+	}
+	return sectionVersionsMap, fieldVersionsMap
+}
 
 func (f JourneyServiceUtil) GetModuleSectionAndFieldVersionsAndActiveVersionNumberList(journeys ...model.Journey) (
 	moduleVersionsMap map[int]model.ModuleVersion, sectionVersionsMap map[int]model.SectionVersion, fieldVersionsMap map[int]model.FieldVersion) {
@@ -174,7 +221,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey 
 			if (model.ModuleVersion{}) == moduleVersion {
 				continue
 			}
-			journeyResponseDto.Modules = append(journeyResponseDto.Modules, f.getModuleVersionResponseDto(moduleVersion,
+			journeyResponseDto.Modules = append(journeyResponseDto.Modules, f.GetModuleVersionResponseDto(moduleVersion,
 				sectionVersionsMap, fieldVersionsMap))
 		}
 	}
@@ -183,7 +230,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey 
 	return journeyResponseDto
 }
 
-func (f JourneyServiceUtil) getModuleVersionResponseDto(moduleVersion model.ModuleVersion,
+func (f JourneyServiceUtil) GetModuleVersionResponseDto(moduleVersion model.ModuleVersion,
 	sectionVersionsMap map[int]model.SectionVersion,
 	fieldVersionsMap map[int]model.FieldVersion) response_dto.ModuleVersionResponseDto {
 	moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{
