@@ -226,7 +226,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey 
 			if (model.ModuleVersion{}) == moduleVersion {
 				continue
 			}
-			journeyResponseDto.Modules = append(journeyResponseDto.Modules, f.getModuleVersionResponseDto(moduleVersion,
+			journeyResponseDto.Modules = append(journeyResponseDto.Modules, f.GetModuleVersionResponseDto(moduleVersion,
 				sectionVersionsMap, fieldVersionsMap))
 		}
 	}
@@ -235,7 +235,7 @@ func (f JourneyServiceUtil) ConstructFlowResponseWithModuleFieldSection(journey 
 	return journeyResponseDto
 }
 
-func (f JourneyServiceUtil) getModuleVersionResponseDto(moduleVersion model.ModuleVersion,
+func (f JourneyServiceUtil) GetModuleVersionResponseDto(moduleVersion model.ModuleVersion,
 	sectionVersionsMap map[int]model.SectionVersion,
 	fieldVersionsMap map[int]model.FieldVersion) response_dto.ModuleVersionResponseDto {
 	moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{

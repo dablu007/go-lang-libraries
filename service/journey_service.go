@@ -76,7 +76,7 @@ func (u JourneyService) GetJourneys(merchantId string, tenantId string, channelI
 func (f JourneyService) GetModuleByModuleID(moduleID string) response_dto.ModuleVersionResponseDto{
 	moduleVersion := repository.NewModuleRepository().FetchModuleVersion(moduleID)
 	sectionVersionMap, fieldVersionMap := f.JourneyServiceUtil.GetSectionAndFieldVersionNumberList(moduleID)
-	return f.JourneyServiceUtil.getModuleVersionResponseDto(moduleVersion, sectionVersionMap, fieldVersionMap)
+	return f.JourneyServiceUtil.GetModuleVersionResponseDto(moduleVersion, sectionVersionMap, fieldVersionMap)
 }
 
 func (f JourneyService) GetJourneyById(journeyExternalId string) response_dto.JourneyResponseDto {
