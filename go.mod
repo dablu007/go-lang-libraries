@@ -17,6 +17,7 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/magiconair/properties v1.8.1
 	github.com/newrelic/go-agent v3.1.0+incompatible
+	github.com/rs/cors v1.7.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.2.0
 	github.com/spf13/viper v1.6.1

@@ -1,0 +1,23 @@
+package enum
+
+type ExecutionStrategy int
+
+const (
+	Background = iota //starts with 0
+	User
+)
+
+func (strategy ExecutionStrategy) String() string {
+	// declare an array of strings
+	strategies := [...]string{
+		"Background",
+		"Current",
+	}
+
+	// prevent panicking in case of
+	// `flowType` is out of range of Weekday
+	if strategy < Background || strategy > Current {
+		return "Unknown"
+	}
+	return strategies[strategy]
+}
