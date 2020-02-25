@@ -11,7 +11,7 @@ func (strategy ExecutionStrategy) String() string {
 	// declare an array of strings
 	strategies := [...]string{
 		"Background",
-		"Current",
+		"User",
 	}
 
 	// prevent panicking in case of
