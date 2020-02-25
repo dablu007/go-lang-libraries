@@ -60,6 +60,6 @@ func (f ModuleRepositoryImpl) FetchModuleVersions(moduleStatus enum.Status, modu
 	if dbConnection == nil {
 		return moduleVersions
 	}
-	dbConnection.Debug().Joins("JOIN module ON module.id = module_version.module_id and module.status = ? and module.deleted_on is NULL", moduleStatus).Where("module_version.id in (?) and module_version.deleted_on is NULL", moduleVersionNumbers).Find(&moduleVersions)
+	dbConnection.Joins("JOIN module ON module.id = module_version.module_id and module.status = ? and module.deleted_on is NULL", moduleStatus).Where("module_version.id in (?) and module_version.deleted_on is NULL", moduleVersionNumbers).Find(&moduleVersions)
 	return moduleVersions
 }

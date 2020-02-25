@@ -16,7 +16,7 @@ func (strategy ExecutionStrategy) String() string {
 
 	// prevent panicking in case of
 	// `flowType` is out of range of Weekday
-	if strategy < Background || strategy > Current {
+	if strategy < Background || strategy > User {
 		return "Unknown"
 	}
 	return strategies[strategy]
