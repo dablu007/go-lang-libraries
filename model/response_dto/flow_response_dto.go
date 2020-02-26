@@ -17,7 +17,7 @@ type JourneyResponseDtoList struct {
 	ExternalId uuid.UUID     `json:"externalId"`
 	Version    string        `json:"version"`
 	Type       string        `json:"type"`
-	Modules    []ResponseDTO `json:"modules"`
+	Modules    []ModuleVersionResponseWithExecutionStrategyDTO `json:"modules"`
 	Sections   []ResponseDTO `json:"sections"`
 	Fields     []ResponseDTO `json:"fields"`
 }

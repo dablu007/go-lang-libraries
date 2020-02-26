@@ -18,3 +18,10 @@ type ResponseDTO struct {
 	Version    string    `json:"version"`
 	ExternalId uuid.UUID `json:"externalId"`
 }
+
+type ModuleVersionResponseWithExecutionStrategyDTO struct {
+	Name              string    `json:"name"`
+	Version           string    `json:"version"`
+	ExternalId        uuid.UUID `json:"externalId"`
+	ExecutionStrategy string    `json:"executionStrategy"`
+}

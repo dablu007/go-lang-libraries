@@ -298,14 +298,15 @@ func (f JourneyServiceUtil) ConstructFlowResponseAsList(journey model.Journey, m
 		ExternalId: journey.ExternalId,
 		Version:    journey.Version,
 		Type:       journey.Type.String()}
-	var moduleVersionList []response_dto.ResponseDTO
+	var moduleVersionList []response_dto.ModuleVersionResponseWithExecutionStrategyDTO
 	var sectionVersionList []response_dto.ResponseDTO
 	var fieldVersionsList []response_dto.ResponseDTO
 	for _, value := range moduleVersions {
-		dto := response_dto.ResponseDTO{
+		dto := response_dto.ModuleVersionResponseWithExecutionStrategyDTO{
 			Name:       value.Name,
 			Version:    value.Version,
 			ExternalId: value.ExternalId,
+			ExecutionStrategy: value.ExecutionStrategy.String(),
 		}
 		moduleVersionList = append(moduleVersionList, dto)
 	}
