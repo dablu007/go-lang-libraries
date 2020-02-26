@@ -37,7 +37,7 @@ func (u RequestValidator) IsValidRequest(merchantId string, tenantId string, cha
 //IsValidUUID : returns true if the UUID is valid UUID
 func IsValidUUID(id string) bool {
 	parsedID, err := uuid.Parse(id)
-	return err != nil && parsedID != uuid.Nil
+	return err == nil && parsedID != uuid.Nil
 }
 
 func (u RequestValidator) GenerateRedisKey(merchantId string, tenantId string, channelId string) string {
