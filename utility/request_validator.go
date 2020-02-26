@@ -2,7 +2,6 @@ package utility
 
 import (
 	"flow/logger"
-	"regexp"
 
 	"github.com/google/uuid"
 )
@@ -35,10 +34,10 @@ func (u RequestValidator) IsValidRequest(merchantId string, tenantId string, cha
 	return true
 }
 
-//IsValidUUID : returns true if the UUID is valid UUID 
+//IsValidUUID : returns true if the UUID is valid UUID
 func IsValidUUID(id string) bool {
-	parsedId, err := uuid.Parse(id)
-	return err!=nil && parsedId!=uuid.Nil
+	parsedID, err := uuid.Parse(id)
+	return err != nil && parsedID != uuid.Nil
 }
 
 func (u RequestValidator) GenerateRedisKey(merchantId string, tenantId string, channelId string) string {
