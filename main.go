@@ -17,7 +17,7 @@ func main() {
 	service := "flow"
 	environment := os.Getenv("BOOT_CUR_ENV")
 	if environment == "" {
-		environment = "staging"
+		environment = "test"
 	}
 	flag.Usage = func() {
 		fmt.Println("Usage: server -s {service_name} -e {environment}")

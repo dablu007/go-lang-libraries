@@ -234,9 +234,10 @@ func (f JourneyServiceUtil) GetModuleVersionResponseDto(moduleVersion model.Modu
 	sectionVersionsMap map[int]model.SectionVersion,
 	fieldVersionsMap map[int]model.FieldVersion) response_dto.ModuleVersionResponseDto {
 	moduleVersionResponseDto := response_dto.ModuleVersionResponseDto{
-		Name:       moduleVersion.Name,
-		ExternalId: moduleVersion.ExternalId,
-		Version:    moduleVersion.Version}
+		Name:              moduleVersion.Name,
+		ExternalId:        moduleVersion.ExternalId,
+		Version:           moduleVersion.Version,
+		ExecutionStrategy: moduleVersion.ExecutionStrategy.String()}
 	json.Unmarshal([]byte(moduleVersion.Properties), &moduleVersionResponseDto.Properties)
 	var sectionVersionNumberList []int
 	json.Unmarshal([]byte(moduleVersion.SectionVersions), &sectionVersionNumberList)
