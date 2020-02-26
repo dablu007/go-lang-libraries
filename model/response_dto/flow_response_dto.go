@@ -13,11 +13,11 @@ type JourneyResponseDto struct {
 }
 
 type JourneyResponseDtoList struct {
-	Name       string        `json:"name"`
-	ExternalId uuid.UUID     `json:"externalId"`
-	Version    string        `json:"version"`
-	Type       string        `json:"type"`
-	Modules    []ResponseDTO `json:"modules"`
-	Sections   []ResponseDTO `json:"sections"`
-	Fields     []ResponseDTO `json:"fields"`
+	Name       string                                          `json:"name"`
+	ExternalId uuid.UUID                                       `json:"externalId"`
+	Version    string                                          `json:"version"`
+	Type       string                                          `json:"type"`
+	Modules    []ModuleVersionResponseWithExecutionStrategyDTO `json:"modules"`
+	Sections   []SectionVersionDTO                             `json:"sections"`
+	Fields     []FieldVersionDTO                               `json:"fields"`
 }

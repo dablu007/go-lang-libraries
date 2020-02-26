@@ -12,3 +12,9 @@ type SectionVersionsResponseDto struct {
 	Properties []PropertryResponseDto     `json:"properties"`
 	Fields     []FieldVersionsResponseDto `json:"fields"`
 }
+
+type SectionVersionDTO struct {
+	Name       string    `json:"name"`
+	Version    string    `json:"version"`
+	ExternalId uuid.UUID `json:"externalId"`
+}

@@ -11,3 +11,9 @@ type FieldVersionsResponseDto struct {
 	Version    string                 `json:"version"`
 	Properties []PropertryResponseDto `json:"properties"`
 }
+
+type FieldVersionDTO struct {
+	Name       string    `json:"name"`
+	Version    string    `json:"version"`
+	ExternalId uuid.UUID `json:"externalId"`
+}
