@@ -1,0 +1,34 @@
+{
+    "name": "boiler-plate",
+    "profiles": [
+      "dev"
+    ],
+    "label": "master",
+    "version": "",
+    "state": null,
+    "propertySources": [
+      {
+        "source": {
+          "Environment": "test",
+          "server.port": ":8080",
+          "JwksUrl": "",
+          "JwksIssuer": "",
+          "JwksAudience": "",
+          "ZestBaseUrl":"",
+          "AllowedOrigins": "",
+          "log.file.path": "",
+          "log.file.name": "boilerplate.log",
+          "log.file.maxsize": 10,
+          "log.file.maxbackup": 5,
+          "log.file.maxage": 30,
+          "redis.url": "",
+          "newrelic.licensekey": "",
+          "AuthenticationBaseUrl" : "",
+          "InternalServiceClientId" : "",
+          "InternServiceSecret" : "",
+          "InternalServiceGrantType" : "",
+          "InternalServiceScope" : ""
+        }
+      }
+    ]
+  }

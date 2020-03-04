@@ -4,11 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-
-	"flow/auth"
+	"flow/db"
 	"flow/cache"
 	"flow/config"
-	"flow/db"
 	"flow/logger"
 	"flow/server"
 )
@@ -24,10 +22,8 @@ func main() {
 		os.Exit(1)
 	}
 	flag.Parse()
-	var db db.DBService
 	config.Init(service, environment)
 	logger.InitLogger()
-	auth.Init()
 	flag.Parse()
 
 	db.Init()

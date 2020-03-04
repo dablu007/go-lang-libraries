@@ -1,0 +1,1 @@
+2020-03-04T16:01:48.628+0530	INFO	db/db.go:30	Failed to connect to DBhost= user= dbname= sslmode=disable password=dial tcp: lookup user=: no such host
