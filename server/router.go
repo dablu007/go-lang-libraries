@@ -29,7 +29,7 @@ func NewRouter() *gin.Engine {
 	}
 	router.Use(nrgin.Middleware(app))
 
-	v1 := router.Group("journey-definition/v1")
+	v1 := router.Group("boiler-plate/v1")
 	{
 		group := v1.Group("/")
 		{
