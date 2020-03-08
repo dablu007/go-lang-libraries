@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"flow/auth"
 	"fmt"
 	"os"
 	"flow/db"
@@ -25,7 +26,7 @@ func main() {
 	config.Init(service, environment)
 	logger.InitLogger()
 	flag.Parse()
-
+	auth.Init()
 	db.Init()
 	cache.Init()
 	server.Init()

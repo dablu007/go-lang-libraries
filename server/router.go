@@ -1,6 +1,7 @@
 package server
 
 import (
+	"flow/auth"
 	"flow/controller"
 	"fmt"
 	"os"
@@ -28,7 +29,7 @@ func NewRouter() *gin.Engine {
 		os.Exit(1)
 	}
 	router.Use(nrgin.Middleware(app))
-
+	router.Use(auth.AuthMiddleware())
 	v1 := router.Group("boiler-plate/v1")
 	{
 		group := v1.Group("/")
