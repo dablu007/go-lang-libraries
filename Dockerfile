@@ -1,7 +1,7 @@
 FROM golang:1.12
 
 # Add Maintainer Info
-LABEL maintainer="abhishek Saurav <abhisheksaurav@zestmoney.com>"
+LABEL maintainer=""
 VOLUME /var/log/
 ENV LOG_PATH=/var/log/
 ARG environment
