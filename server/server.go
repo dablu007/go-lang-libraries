@@ -1,7 +1,7 @@
 package server
 
 import (
-	"flow/logger"
+	"boiler-plate/logger"
 	"github.com/spf13/viper"
 
 	"github.com/gin-gonic/gin"

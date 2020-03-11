@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"boiler-plate/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"flow/logger"
 )
 
 type HealthController struct{}

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"flow/auth"
-	"flow/controller"
+	"boiler-plate/auth"
+	"boiler-plate/controller"
 	"fmt"
 	"os"
 

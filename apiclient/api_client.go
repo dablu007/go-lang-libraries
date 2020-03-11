@@ -1,9 +1,9 @@
 package apiclient
 
 import (
+	"boiler-plate/logger"
 	"encoding/json"
 	"errors"
-	"flow/logger"
 	"fmt"
 	"io/ioutil"
 	"net/http"

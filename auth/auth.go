@@ -1,9 +1,9 @@
 package auth
 
 import (
+	"boiler-plate/logger"
 	"encoding/json"
 	"errors"
-	"flow/logger"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"

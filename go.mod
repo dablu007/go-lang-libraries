@@ -1,4 +1,4 @@
-module flow
+module boiler-plate
 
 go 1.13
 

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"flow/logger"
+	"boiler-plate/logger"
 	"fmt"
 	"os"
 	"bitbucket.org/liamstask/goose/lib/goose"

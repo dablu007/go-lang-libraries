@@ -1,15 +1,15 @@
 package main
 
 import (
+	"boiler-plate/auth"
+	"boiler-plate/cache"
+	"boiler-plate/config"
+	"boiler-plate/db"
+	"boiler-plate/logger"
+	"boiler-plate/server"
 	"flag"
-	"flow/auth"
 	"fmt"
 	"os"
-	"flow/db"
-	"flow/cache"
-	"flow/config"
-	"flow/logger"
-	"flow/server"
 )
 
 func main() {
