@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"go-lang/libraries/logger"
 	"encoding/json"
 	"errors"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
+	"github.com/dablu007/go-lang-libraries/logger"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"

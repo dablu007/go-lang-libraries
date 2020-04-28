@@ -1,1 +1,1 @@
-2020-03-04T16:01:48.628+0530	INFO	db/db.go:30	Failed to connect to DBhost= user= dbname= sslmode=disable password=dial tcp: lookup user=: no such host
+{"level":"FATAL","ts":"2020-04-28T15:53:06.063+0530","caller":"db/db.go:36","msg":"Failed to connect to DB%!(EXTRA string=host= user= dbname= sslmode=disable password=, string=dial tcp: lookup user=: no such host)"}

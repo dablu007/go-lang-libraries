@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"github.com/dablu007/go-lang-libraries/logger"
 	"github.com/gin-gonic/gin"
-	"go-lang/libraries/logger"
 	"net/http"
 )
 

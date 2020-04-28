@@ -1,9 +1,9 @@
 package server
 
 import (
-	"go-lang/libraries/auth"
-	"go-lang/libraries/controller"
 	"fmt"
+	"github.com/dablu007/go-lang-libraries/auth"
+	"github.com/dablu007/go-lang-libraries/controller"
 	"os"
 
 	"github.com/gin-gonic/gin"

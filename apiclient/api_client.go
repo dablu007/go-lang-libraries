@@ -1,10 +1,10 @@
 package apiclient
 
 import (
-	"boiler-plate/logger"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dablu007/go-lang-libraries/logger"
 	"io/ioutil"
 	"net/http"
 	"net/url"

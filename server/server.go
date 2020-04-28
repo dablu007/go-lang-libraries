@@ -1,7 +1,7 @@
 package server
 
 import (
-	"go-lang/libraries/logger"
+	"github.com/dablu007/go-lang-libraries/logger"
 	"github.com/spf13/viper"
 
 	"github.com/gin-gonic/gin"

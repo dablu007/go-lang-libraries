@@ -3,13 +3,13 @@ package db
 import (
 	"bitbucket.org/liamstask/goose/lib/goose"
 	"fmt"
+	"github.com/dablu007/go-lang-libraries/logger"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"os"
-	"go-lang/libraries/logger"
 	"time"
 )
 

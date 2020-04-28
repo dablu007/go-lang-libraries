@@ -1,4 +1,4 @@
-module go-lang/libraries
+module github.com/dablu007/go-lang-libraries
 
 go 1.14
 
@@ -28,3 +28,4 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099 // indirect
 )
+
