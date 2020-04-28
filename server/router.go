@@ -30,7 +30,7 @@ func NewRouter() *gin.Engine {
 	}
 	router.Use(nrgin.Middleware(app))
 	router.Use(auth.AuthMiddleware())
-	v1 := router.Group("boiler-plate/v1")
+	v1 := router.Group("go-lang-libraries/v1")
 	{
 		group := v1.Group("/")
 		{

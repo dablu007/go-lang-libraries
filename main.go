@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	service := "boiler-plate"
+	service := "go-lang-libraries"
 	environment := os.Getenv("BOOT_CUR_ENV")
 	if environment == "" {
 		environment = "test"
