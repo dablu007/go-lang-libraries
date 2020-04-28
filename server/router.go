@@ -1,8 +1,8 @@
 package server
 
 import (
-	"boiler-plate/auth"
-	"boiler-plate/controller"
+	"go-lang/libraries/auth"
+	"go-lang/libraries/controller"
 	"fmt"
 	"os"
 

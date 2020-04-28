@@ -1,15 +1,16 @@
 package db
 
 import (
-	"boiler-plate/logger"
-	"fmt"
-	"os"
 	"bitbucket.org/liamstask/goose/lib/goose"
+	"fmt"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
+	"os"
+	"go-lang/libraries/logger"
+	"time"
 )
 
 var db *gorm.DB
@@ -24,6 +25,9 @@ func Init() {
 	dbURL := viper.GetString("database.url")
 	dbName := viper.GetString("database.name")
 	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", dbURL, dbUserName, dbName, dbPassword) //Build connection string
+	maxIdleConnections := viper.GetInt("postgresdb.maxIdleConnections")
+	maxOpenConnections := viper.GetInt("postgresdb.maxOpenConns")
+	connectionMaxLifetime := viper.GetInt("postgresdb.connMaxLifetimeInHours")
 
 	//dbConnectionString := dbUserName + ":" + dbPassword + "@tcp(" + dbUrl + ")/" + dbName
 	db, err = gorm.Open("postgres", dbURI)
@@ -38,6 +42,10 @@ func Init() {
 		logger.SugarLogger.Fatalf("Not able to fetch the working directory")
 		os.Exit(1)
 	}
+	db.DB().SetMaxIdleConns(maxIdleConnections)
+	db.DB().SetMaxOpenConns(maxOpenConnections)
+	db.DB().SetConnMaxLifetime(time.Hour * time.Duration(connectionMaxLifetime))
+	db.SingularTable(true)
 	workingDir = workingDir + "/db/migrations"
 	migrateConf := &goose.DBConf{
 		MigrationsDir: workingDir,

@@ -1,36 +1,49 @@
 package logger
 
 import (
-	logrs "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"path"
 	"sync"
+	"os"
 )
 
-var logger *logrs.Logger
 var lock = &sync.Mutex{}
 var SugarLogger *zap.SugaredLogger
 
 func InitLogger() {
 	writerSyncer := getLogWriter()
 
-	encoder := getEncoder()
+	var core zapcore.Core
 
-	core := zapcore.NewCore(encoder, writerSyncer, zapcore.DebugLevel)
+	if viper.GetString("Environment") == "dev" {
+		core = zapcore.NewTee(
+			zapcore.NewCore(getConsoleEncoder(), zapcore.AddSync(os.Stdout), zapcore.DebugLevel),
+			zapcore.NewCore(getFileEncoder(), writerSyncer, zapcore.DebugLevel),
+		)
+	} else {
+		core = zapcore.NewCore(getFileEncoder(), writerSyncer, zapcore.DebugLevel)
+	}
 
 	logger := zap.New(core, zap.AddCaller())
 
 	SugarLogger = logger.Sugar()
 }
 
-func getEncoder() zapcore.Encoder {
+func getConsoleEncoder() zapcore.Encoder {
 	encoderConfig := zap.NewProductionEncoderConfig()
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	return zapcore.NewConsoleEncoder(encoderConfig)
+}
+
+func getFileEncoder() zapcore.Encoder {
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	return zapcore.NewJSONEncoder(encoderConfig)
 }
 
 func getLogWriter() zapcore.WriteSyncer {

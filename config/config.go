@@ -3,16 +3,20 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
+	"net/http"
+	"github.com/spf13/viper"
 )
 
 var config *viper.Viper
 
-func Init(service, env string) {
-	fmt.Println("Loading config from %s\n")
-	body, err := fetchConfiguration()
+//Init :
+func Init(configurationUrl, service, env string) {
+	url := configurationUrl + service + "/" + env
+	fmt.Println("url is : ", url)
+	fmt.Println("Loading config from \n", url)
+	body, err := fetchConfiguration(url)
 	if err != nil {
 		fmt.Println("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
 	}
@@ -20,15 +24,24 @@ func Init(service, env string) {
 }
 
 // Make HTTP request to fetch configuration from config server
-func fetchConfiguration() ([]byte, error) {
+func fetchConfiguration(url string) ([]byte, error) {
+	resp, err := http.Get(url)
 	var bodyBytes []byte
-		//panic("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
-	var err error
-	bodyBytes, err = ioutil.ReadFile("config/config.json")
 	if err != nil {
-		fmt.Println("Couldn't read local configuration file.", err)
+		//panic("Couldn't load configuration, cannot start. Terminating. Error: " + err.Error())
+		bodyBytes, err = ioutil.ReadFile("config/config.json")
+		if err != nil {
+			fmt.Println("Couldn't read local configuration file.", err)
+		} else {
+			log.Print("using local config.")
+		}
 	} else {
-		log.Print("using local config.")
+		if resp != nil {
+			bodyBytes, err = ioutil.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Println("Error reading configuration response body.")
+			}
+		}
 	}
 	return bodyBytes, err
 }
@@ -42,10 +55,10 @@ func parseConfiguration(body []byte) {
 	}
 	for key, value := range cloudConfig.PropertySources[0].Source {
 		viper.Set(key, value)
-		fmt.Println("Loading config property %v => %v\n", key, value)
+		fmt.Println("Loading config property\n", key, value)
 	}
 	if viper.IsSet("server_name") {
-		fmt.Println("Successfully loaded configuration for service %s\n", viper.GetString("server_name"))
+		fmt.Println("Successfully loaded configuration for service\n", viper.GetString("server_name"))
 	}
 }
 

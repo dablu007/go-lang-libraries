@@ -1,14 +1,14 @@
 package main
 
 import (
-	"boiler-plate/auth"
-	"boiler-plate/cache"
-	"boiler-plate/config"
-	"boiler-plate/db"
-	"boiler-plate/logger"
-	"boiler-plate/server"
 	"flag"
 	"fmt"
+	"go-lang/libraries/auth"
+	"go-lang/libraries/cache"
+	"go-lang/libraries/config"
+	"go-lang/libraries/db"
+	"go-lang/libraries/logger"
+	"go-lang/libraries/server"
 	"os"
 )
 
@@ -23,7 +23,8 @@ func main() {
 		os.Exit(1)
 	}
 	flag.Parse()
-	config.Init(service, environment)
+	configUrl := "" // Put the configuration url of spring cloud config
+	config.Init(configUrl, service, environment)
 	logger.InitLogger()
 	flag.Parse()
 	auth.Init()

@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"boiler-plate/logger"
 	"github.com/gin-gonic/gin"
+	"go-lang/libraries/logger"
 	"net/http"
 )
 
