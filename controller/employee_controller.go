@@ -19,3 +19,10 @@ func (e EmployeeController) FetchEmployeeDetails(c *gin.Context) {
 	fmt.Println("this is the data recieced ", data)
 	c.String(http.StatusOK, data.Name)
 }
+
+func (e EmployeeController) FetchDetails(c *gin.Context){
+	logger.SugarLogger.Infow("Inside fetch details of employee controller")
+	fmt.Println("Inside fetch details of employee controller")
+	var data = e.EmployeeService.FetchdDetailsFromOpenAPI()
+	c.JSON(http.StatusOK, data)
+}

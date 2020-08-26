@@ -28,6 +28,7 @@ func NewRouter() *gin.Engine {
 		{
 			group.GET("health", health.Status)
 			group.GET("employee-details/:id", employeeController.FetchEmployeeDetails)
+			group.GET("details/", employeeController.FetchDetails)
 		}
 	}
 	return router
