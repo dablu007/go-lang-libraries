@@ -10,7 +10,11 @@
       {
         "source": {
           "Environment": "test",
-          "server.port": ":8080",
+          "server.port": ":9080",
+          "database.username": "myuser",
+          "database.password": "mypass",
+          "database.url": "localhost",
+          "database.name": "mydb",
           "JwksUrl": "",
           "JwksIssuer": "",
           "JwksAudience": "",

@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go-lang/libraries/auth"
-	"go-lang/libraries/cache"
-	"go-lang/libraries/config"
-	"go-lang/libraries/db"
-	"go-lang/libraries/logger"
-	"go-lang/libraries/server"
+	"github.com/dablu007/go-lang-libraries/auth"
+	"github.com/dablu007/go-lang-libraries/cache"
+	"github.com/dablu007/go-lang-libraries/config"
+	"github.com/dablu007/go-lang-libraries/db"
+	"github.com/dablu007/go-lang-libraries/logger"
+	"github.com/dablu007/go-lang-libraries/server"
 	"os"
 )
 
@@ -28,6 +28,8 @@ func main() {
 	logger.InitLogger()
 	flag.Parse()
 	auth.Init()
+	/* Remove the commented code the set the properties
+		inside the config.json file */
 	db.Init()
 	cache.Init()
 	server.Init()
